@@ -1,0 +1,40 @@
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.10.3
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-amazon
+  volumes:
+    - ../dags:/opt/airflow/dags
+    - ../logs:/opt/airflow/logs
+    - ../plugins:/opt/airflow/plugins
+    - ~/.aws:/home/airflow/.aws:ro
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    - postgres
+
+services:
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+
+volumes:
+  postgres-db-volume:
