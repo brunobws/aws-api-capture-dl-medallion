@@ -128,14 +128,16 @@ class AthenaConnector:
             # Parse results
             result_rows = []
             column_names = None
+            header_processed = False
 
             for page in pages:
                 rows = page["ResultSet"]["Rows"]
 
-                # First row contains column names
-                if column_names is None and len(rows) > 0:
+                # First row of first page contains column names
+                if not header_processed and len(rows) > 0:
                     column_names = [col["VarCharValue"] for col in rows[0]["Data"]]
-                    continue
+                    header_processed = True
+                    rows = rows[1:]  # Skip header row
 
                 # Process data rows
                 for row in rows:
