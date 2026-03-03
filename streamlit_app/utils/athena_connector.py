@@ -132,10 +132,12 @@ class AthenaConnector:
 
             for page in pages:
                 rows = page["ResultSet"]["Rows"]
+                logger.debug(f"Processing page with {len(rows)} rows")
 
                 # First row of first page contains column names
                 if not header_processed and len(rows) > 0:
-                    column_names = [col["VarCharValue"] for col in rows[0]["Data"]]
+                    column_names = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
+                    logger.debug(f"Extracted column names: {column_names}")
                     header_processed = True
                     rows = rows[1:]  # Skip header row
 
@@ -144,6 +146,8 @@ class AthenaConnector:
                     data = [col.get("VarCharValue", "") for col in row["Data"]]
                     result_rows.append(data)
 
+            logger.debug(f"Total result rows collected: {len(result_rows)}")
+            
             if not result_rows:
                 logger.warning("Query returned no results")
                 return pd.DataFrame()
@@ -154,6 +158,7 @@ class AthenaConnector:
 
         except Exception as e:
             logger.error(f"Error retrieving query results: {str(e)}")
+            logger.error(f"Exception details: {type(e).__name__}")
             raise
 
     def query_to_dataframe(self, query: str) -> pd.DataFrame:
