@@ -132,24 +132,31 @@ class AthenaConnector:
 
             for page in pages:
                 rows = page["ResultSet"]["Rows"]
-                logger.debug(f"Processing page with {len(rows)} rows")
+                logger.info(f"Processing page with {len(rows)} rows")
 
                 # First row of first page contains column names
                 if not header_processed and len(rows) > 0:
+                    logger.info(f"First row structure: {rows[0]}")
+                    if rows[0]["Data"]:
+                        logger.info(f"First column structure: {rows[0]['Data'][0]}")
+                    
                     column_names = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
-                    logger.debug(f"Extracted column names: {column_names}")
+                    logger.info(f"Extracted column names: {column_names}")
                     header_processed = True
                     rows = rows[1:]  # Skip header row
 
                 # Process data rows
-                for row in rows:
+                for idx, row in enumerate(rows):
                     data = [col.get("VarCharValue", "") for col in row["Data"]]
+                    if idx < 2:
+                        logger.info(f"Row {idx} data: {data}")
                     result_rows.append(data)
 
-            logger.debug(f"Total result rows collected: {len(result_rows)}")
+            logger.info(f"Total result rows collected: {len(result_rows)}")
             
             if not result_rows:
                 logger.warning("Query returned no results")
+                logger.warning(f"Column names found: {column_names}")
                 return pd.DataFrame()
 
             df = pd.DataFrame(result_rows, columns=column_names)
