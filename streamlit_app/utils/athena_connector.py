@@ -129,6 +129,8 @@ class AthenaConnector:
             result_rows = []
             column_names = None
             header_processed = False
+            
+            logger.info("Starting to process query results pages")
 
             for page in pages:
                 rows = page["ResultSet"]["Rows"]
