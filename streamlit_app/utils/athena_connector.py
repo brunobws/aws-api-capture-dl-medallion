@@ -139,7 +139,14 @@ class AthenaConnector:
 
                 # Process data rows
                 for row in rows:
-                    data = [col.get("VarCharValue", "") for col in row["Data"]]
+                    data = []
+                    for col in row["Data"]:
+                        # Handle different value types returned by Athena
+                        if "VarCharValue" in col:
+                            data.append(col.get("VarCharValue"))
+                        else:
+                            # For null values or other types
+                            data.append(None)
                     result_rows.append(data)
 
             if not result_rows:
