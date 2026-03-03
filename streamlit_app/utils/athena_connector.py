@@ -207,7 +207,12 @@ class AthenaConnector:
                 raise RuntimeError("Query execution timeout after 5 minutes")
 
             # Get results
-            return self.get_query_results(execution_id)
+            try:
+                return self.get_query_results(execution_id)
+            except ValueError as e:
+                if "COLUMN_NOT_FOUND" in str(e):
+                    logger.error(f"Column not found - table structure may be different: {str(e)}")
+                raise
 
         except Exception as e:
             logger.error(f"Error in query_to_dataframe: {str(e)}")
