@@ -15,6 +15,7 @@
 #   - Recent execution details table
 ####################################################################
 
+########### imports ################
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -29,8 +30,16 @@ from config import (
     CHART_COLOR_PRIMARY, CHART_COLOR_SUCCESS, CHART_COLOR_ERROR, CHART_COLOR_WARNING,
     DATA_LAYERS
 )
+from theme import (
+    COLOR_ORANGE, COLOR_SUCCESS, COLOR_ERROR, COLOR_WARNING, COLOR_INFO,
+    apply_professional_theme, card_css
+)
+###################################
 
 logger = get_logger(__name__)
+
+# Apply card styling globally
+st.markdown(card_css(), unsafe_allow_html=True)
 
 
 @cached_query(ttl_seconds=300)
@@ -124,9 +133,9 @@ def render_logs_observability(athena_service: AthenaService):
     st.divider()
 
     ####################################################################
-    # KPIs
+    # KPIs SECTION
     ####################################################################
-    st.subheader("📊 Pipeline Metrics")
+    st.subheader("Pipeline Metrics")
 
     kpi_col1, kpi_col2, kpi_col3, kpi_col4, kpi_col5 = st.columns(5)
 
@@ -155,7 +164,7 @@ def render_logs_observability(athena_service: AthenaService):
     st.divider()
 
     ####################################################################
-    # CHARTS
+    # CHARTS SECTION
     ####################################################################
     col1, col2 = st.columns(2)
 
@@ -177,7 +186,7 @@ def render_logs_observability(athena_service: AthenaService):
                 y="count",
                 title="Daily Execution Count",
                 labels={"exec_date": "Date", "count": "Count"},
-                color_discrete_sequence=[CHART_COLOR_PRIMARY],
+                color_discrete_sequence=[COLOR_ORANGE],
                 height=CHART_HEIGHT,
                 markers=True
             )
@@ -193,6 +202,7 @@ def render_logs_observability(athena_service: AthenaService):
                 tickangle=0
             )
             fig.update_layout(hovermode="x unified")
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
         else:
             st.info("No data available for the selected filters")
@@ -206,16 +216,16 @@ def render_logs_observability(athena_service: AthenaService):
         if status_counts:
             # Define color mapping for each status (lowercase as per data)
             status_colors = {
-                "success": CHART_COLOR_SUCCESS,      # Green
-                "error": CHART_COLOR_ERROR,          # Red
-                "warning": "#DAA520",                # Darker Gold
-                "SUCCEEDED": CHART_COLOR_SUCCESS,    # Fallback uppercase
-                "FAILED": CHART_COLOR_ERROR,         # Fallback uppercase
-                "running": CHART_COLOR_PRIMARY,      # Blue
-                "cancelled": "#808080"               # Gray
+                "success": COLOR_SUCCESS,      # Green
+                "error": COLOR_ERROR,          # Red
+                "warning": COLOR_WARNING,      # Gold
+                "SUCCEEDED": COLOR_SUCCESS,    # Fallback uppercase
+                "FAILED": COLOR_ERROR,         # Fallback uppercase
+                "running": COLOR_INFO,         # Blue
+                "cancelled": "#808080"         # Gray
             }
             
-            colors = [status_colors.get(status.lower() if isinstance(status, str) else str(status), CHART_COLOR_ERROR) 
+            colors = [status_colors.get(status.lower() if isinstance(status, str) else str(status), COLOR_ERROR) 
                      for status in status_counts.keys()]
             
             fig = go.Figure(data=[go.Pie(
@@ -224,6 +234,7 @@ def render_logs_observability(athena_service: AthenaService):
                 marker=dict(colors=colors)
             )])
             fig.update_layout(height=CHART_HEIGHT)
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
 
     st.divider()
@@ -250,11 +261,12 @@ def render_logs_observability(athena_service: AthenaService):
                 x="mean",
                 title="Average Execution Duration by Job",
                 labels={"job_name": "Job", "mean": "Duration (seconds)"},
-                color_discrete_sequence=[CHART_COLOR_WARNING],
+                color_discrete_sequence=[COLOR_WARNING],
                 height=CHART_HEIGHT,
                 orientation="h"
             )
             fig.update_layout(showlegend=False)
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
 
     # Chart 4: Executions by layer
@@ -276,18 +288,19 @@ def render_logs_observability(athena_service: AthenaService):
                 y="count",
                 title="Execution Count by Layer",
                 labels={"layer": "Layer", "count": "Count"},
-                color_discrete_sequence=[CHART_COLOR_PRIMARY],
+                color_discrete_sequence=[COLOR_ORANGE],
                 height=CHART_HEIGHT
             )
             fig.update_layout(showlegend=False)
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
 
     st.divider()
 
     ####################################################################
-    # RECENT EXECUTIONS TABLE
+    # RECENT EXECUTIONS TABLE SECTION
     ####################################################################
-    st.subheader("📋 Recent Executions")
+    st.subheader("Recent Executions")
 
     display_cols = ["start_execution", "job_name", "status", "layer", "error", "duration_seconds"]
     display_df = filtered_df[display_cols].copy()
@@ -300,7 +313,7 @@ def render_logs_observability(athena_service: AthenaService):
     )
 
     ####################################################################
-    # EXPORT
+    # EXPORT SECTION
     ####################################################################
     col1, col2 = st.columns(2)
 

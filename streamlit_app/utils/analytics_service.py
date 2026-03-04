@@ -1,16 +1,24 @@
-"""
-Analytics service for data aggregations and calculations.
+####################################################################
+# Author: Bruno William da Silva
+# Date: 03/03/2026
+#
+# Description:
+#   Analytics service for data aggregations and calculations.
+#   Provides business logic for metrics, KPIs, and derived analytics.
+#
+#   Key Features:
+#   - KPI calculations
+#   - Data aggregations
+#   - Derived metrics
+#   - Performance analysis
+####################################################################
 
-Provides business logic for metrics, KPIs, and derived analytics.
-
-Author: Data Team
-Version: 2.0.0
-"""
-
+########### imports ################
 import pandas as pd
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime, timedelta
 from utils.logger import get_logger
+###################################
 
 logger = get_logger(__name__)
 

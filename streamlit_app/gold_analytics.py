@@ -15,6 +15,7 @@
 #   - Export functionality (CSV, JSON)
 ####################################################################
 
+########### imports ################
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -25,8 +26,16 @@ from config import (
     ATHENA_DATABASE, GOLD_TABLE, CHART_HEIGHT,
     CHART_COLOR_PRIMARY, CHART_COLOR_SUCCESS
 )
+from theme import (
+    COLOR_DARK_GRAY, COLOR_ORANGE, COLOR_SUCCESS,
+    COLOR_ERROR, apply_professional_theme, card_css
+)
+###################################
 
 logger = get_logger(__name__)
+
+# Apply card styling globally
+st.markdown(card_css(), unsafe_allow_html=True)
 
 
 @cached_query(ttl_seconds=300)
@@ -80,7 +89,7 @@ def render_gold_analytics(athena_service: AthenaService):
     # Convert to proper types
     df["nr_total_breweries"] = pd.to_numeric(df["nr_total_breweries"], errors="coerce")
 
-    st.subheader("🔍 Filters")
+    st.subheader("Filters")
 
     col1, col2, col3 = st.columns(3)
 
@@ -129,6 +138,8 @@ def render_gold_analytics(athena_service: AthenaService):
             key="gold_types"
         )
 
+    st.markdown("""</div>""", unsafe_allow_html=True)
+
     ####################################################################
     # APPLY ALL FILTERS
     ####################################################################
@@ -141,9 +152,9 @@ def render_gold_analytics(athena_service: AthenaService):
     st.divider()
 
     ####################################################################
-    # KPIs
+    # KPIs SECTION
     ####################################################################
-    st.subheader("📊 Key Performance Indicators")
+    st.subheader("Key Performance Indicators")
 
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
 
@@ -168,7 +179,7 @@ def render_gold_analytics(athena_service: AthenaService):
     st.divider()
 
     ####################################################################
-    # CHARTS
+    # CHARTS SECTION
     ####################################################################
     col1, col2 = st.columns(2)
 
@@ -189,10 +200,11 @@ def render_gold_analytics(athena_service: AthenaService):
                 y="nr_total_breweries",
                 title="Total Breweries by Type",
                 labels={"ds_brewery_type": "Type", "nr_total_breweries": "Count"},
-                color_discrete_sequence=[CHART_COLOR_PRIMARY],
+                color_discrete_sequence=[COLOR_ORANGE],
                 height=CHART_HEIGHT
             )
             fig.update_layout(xaxis_tickangle=-45, showlegend=False)
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
         else:
             st.info("No data for selected filters")
@@ -216,11 +228,12 @@ def render_gold_analytics(athena_service: AthenaService):
                 x="nr_total_breweries",
                 title="Top 10 States by Total Breweries",
                 labels={"nm_state": "State", "nr_total_breweries": "Count"},
-                color_discrete_sequence=[CHART_COLOR_SUCCESS],
+                color_discrete_sequence=[COLOR_SUCCESS],
                 height=CHART_HEIGHT,
                 orientation="h"
             )
             fig.update_layout(showlegend=False)
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
         else:
             st.info("No data for selected filters")
@@ -228,9 +241,9 @@ def render_gold_analytics(athena_service: AthenaService):
     st.divider()
 
     ####################################################################
-    # DETAILED DATA TABLE
+    # DETAILED DATA TABLE SECTION
     ####################################################################
-    st.subheader("📋 Detailed Data")
+    st.subheader("Detailed Data")
 
     display_df = filtered_df[
         ["nm_country", "nm_state", "ds_brewery_type", "nr_total_breweries"]
@@ -245,7 +258,7 @@ def render_gold_analytics(athena_service: AthenaService):
     )
 
     ####################################################################
-    # EXPORT
+    # EXPORT SECTION
     ####################################################################
     col1, col2, col3 = st.columns(3)
 

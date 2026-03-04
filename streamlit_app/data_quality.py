@@ -15,6 +15,7 @@
 #   - Test data export (CSV, JSON)
 ####################################################################
 
+########### imports ################
 import streamlit as st
 import pandas as pd
 import json
@@ -30,8 +31,16 @@ from config import (
     ATHENA_LOGS_DATABASE, LOGS_TABLE, CHART_HEIGHT,
     CHART_COLOR_PRIMARY, CHART_COLOR_SUCCESS, CHART_COLOR_ERROR, CHART_COLOR_WARNING
 )
+from theme import (
+    COLOR_ORANGE, COLOR_SUCCESS, COLOR_ERROR, COLOR_WARNING,
+    apply_professional_theme, card_css
+)
+###################################
 
 logger = get_logger(__name__)
+
+# Apply card styling globally
+st.markdown(card_css(), unsafe_allow_html=True)
 
 
 @cached_query(ttl_seconds=300)
@@ -149,41 +158,33 @@ def render_data_quality(athena_service: AthenaService):
     ####################################################################
     # DETAILED TEST RESULTS
     ####################################################################
-    st.subheader("📋 Test Results Details")
+    st.subheader("Test Results Details")
 
     # Extract all test results from info column
     all_tests = []
-    debug_info = []
     
     for idx, row in df.iterrows():
         try:
             info_val = row.get("info")
             if not info_val:
-                debug_info.append(f"Row {idx}: No info value")
                 continue
-            
-            debug_info.append(f"Row {idx}: Info type={type(info_val).__name__}, len={len(str(info_val))}")
             
             # Try JSON parsing first
             if isinstance(info_val, str):
                 try:
                     info_dict = json.loads(info_val)
-                    debug_info.append(f"Row {idx}: Parsed as JSON")
                 except (json.JSONDecodeError, ValueError):
                     try:
                         info_dict = ast.literal_eval(info_val)
-                        debug_info.append(f"Row {idx}: Parsed as Python literal")
                     except Exception as e:
-                        debug_info.append(f"Row {idx}: Parse error: {str(e)[:50]}")
+                        logger.debug(f"Parse error for row {idx}: {str(e)}")
                         continue
             else:
                 info_dict = info_val
-                debug_info.append(f"Row {idx}: Used as dict directly")
             
             # Extract quality tests
             if isinstance(info_dict, dict):
                 tests = info_dict.get("quality_tests", [])
-                debug_info.append(f"Row {idx}: Found {len(tests)} tests")
                 
                 if isinstance(tests, list):
                     for test in tests:
@@ -196,16 +197,9 @@ def render_data_quality(athena_service: AthenaService):
                                 "test": test.get("test_applied", ""),
                                 "status": test.get("status", "")
                             })
-            else:
-                debug_info.append(f"Row {idx}: info_dict is not a dict: {type(info_dict)}")
         except Exception as e:
-            debug_info.append(f"Row {idx}: Exception: {str(e)[:80]}")
             logger.debug(f"Error processing row {idx}: {str(e)}")
             continue
-    
-    # Show debug info in expandable section
-    with st.expander("🔧 Debug Info"):
-        st.text("\n".join(debug_info[-10:]))  # Show last 10 messages
     
     st.info(f"Extracted {len(all_tests)} test results from {len(df)} executions")
 
@@ -220,8 +214,8 @@ def render_data_quality(athena_service: AthenaService):
             status_counts = tests_df["status"].value_counts()
             
             status_colors = {
-                "success": CHART_COLOR_SUCCESS,
-                "failure": CHART_COLOR_ERROR
+                "success": COLOR_SUCCESS,
+                "failure": COLOR_ERROR
             }
             colors = [status_colors.get(s, "#999") for s in status_counts.index]
             
@@ -232,6 +226,7 @@ def render_data_quality(athena_service: AthenaService):
                 height=CHART_HEIGHT,
                 color_discrete_sequence=colors
             )
+            fig = apply_professional_theme(fig)
             st.plotly_chart(fig, width='stretch')
         
         # Chart 2: Failing tests by column
@@ -246,11 +241,12 @@ def render_data_quality(athena_service: AthenaService):
                     y=col_failures.index,
                     title="Columns with Test Failures",
                     labels={"x": "Failures", "y": "Column"},
-                    color_discrete_sequence=[CHART_COLOR_ERROR],
+                    color_discrete_sequence=[COLOR_ERROR],
                     height=CHART_HEIGHT,
                     orientation="h"
                 )
                 fig.update_layout(showlegend=False)
+                fig = apply_professional_theme(fig)
                 st.plotly_chart(fig, width='stretch')
             else:
                 st.success("✅ All tests passed!")
@@ -279,7 +275,7 @@ def render_data_quality(athena_service: AthenaService):
                 return "color: green"
             return ""
         
-        styled_df = display_tests.style.applymap(color_status, subset=["status"])
+        styled_df = display_tests.style.map(color_status, subset=["status"])
         
         st.dataframe(
             display_tests.sort_values("start_time", ascending=False),

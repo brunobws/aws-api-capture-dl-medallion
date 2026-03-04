@@ -8,8 +8,10 @@
 #   across all application modules.
 ####################################################################
 
+########### imports ################
 import logging
 from utils.config import LOG_LEVEL, LOG_FORMAT
+###################################
 
 
 def get_logger(name: str) -> logging.Logger:

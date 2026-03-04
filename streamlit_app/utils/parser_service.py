@@ -1,18 +1,25 @@
-"""
-Parser service for extracting and normalizing data from JSON-like fields.
+####################################################################
+# Author: Bruno William da Silva
+# Date: 03/03/2026
+#
+# Description:
+#   Parser service for extracting and normalizing data from JSON-like fields.
+#   Particularly handles parsing the "info" column from execution_logs which contains
+#   Data Quality test results in JSON format.
+#
+#   Key Features:
+#   - JSON parsing with fallbacks
+#   - Data normalization
+#   - Error handling and logging
+####################################################################
 
-Particularly handles parsing the "info" column from execution_logs which contains
-Data Quality test results in JSON format.
-
-Author: Data Team
-Version: 2.0.0
-"""
-
+########### imports ################
 import json
 import pandas as pd
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 from utils.logger import get_logger
+###################################
 
 logger = get_logger(__name__)
 

@@ -1,0 +1,192 @@
+====================================================================
+DATA PLATFORM MONITORING & ANALYTICS DASHBOARD
+Setup Instructions for New Users
+====================================================================
+
+PROJECT OVERVIEW:
+This is a professional data platform dashboard for monitoring and 
+analyzing a Medallion Data Lake architecture on AWS. It provides:
+- Gold Analytics: Brewery aggregation insights
+- Logs Observability: Pipeline health monitoring
+- Data Quality: Test results and metrics
+
+====================================================================
+REQUIREMENTS
+====================================================================
+
+1. Operating System: Windows, macOS, or Linux
+2. Python: 3.8 or higher
+3. AWS Account with:
+   - Athena database access
+   - S3 bucket for query results
+   - Proper IAM permissions
+
+====================================================================
+INSTALLATION STEPS
+====================================================================
+
+STEP 1: Clone/Download Project
+  - Download the project to your local machine
+  - Navigate to the project root directory in terminal
+
+STEP 2: Create Virtual Environment
+  Open terminal/PowerShell in project root and run:
+  
+  Windows (PowerShell):
+    python -m venv venv
+    venv\Scripts\Activate.ps1
+  
+  macOS/Linux:
+    python -m venv venv
+    source venv/bin/activate
+
+STEP 3: Install Dependencies
+  pip install -r requirements.txt
+
+STEP 4: Configure AWS Credentials
+  Set environment variables for AWS access:
+  
+  Windows (PowerShell):
+    $env:AWS_REGION = "sa-east-1"
+    $env:ATHENA_DATABASE = "gold"
+    $env:ATHENA_LOGS_DATABASE = "logs"
+    $env:ATHENA_S3_OUTPUT = "s3://your-bucket/athena/results/"
+  
+  macOS/Linux:
+    export AWS_REGION=sa-east-1
+    export ATHENA_DATABASE=gold
+    export ATHENA_LOGS_DATABASE=logs
+    export ATHENA_S3_OUTPUT=s3://your-bucket/athena/results/
+
+  OR create a .env file in project root with these values
+
+STEP 5: Verify AWS Configuration
+  - Ensure AWS credentials are configured locally
+  - Test with: aws sts get-caller-identity
+
+====================================================================
+RUNNING THE DASHBOARD
+====================================================================
+
+Option A: Use Startup Script (Windows)
+  1. Double-click: start_dashboard.bat
+  2. Dashboard opens automatically at http://localhost:8501
+
+Option B: Manual Startup
+  1. Activate virtual environment (Step 2 above)
+  2. Run: cd streamlit_app
+  3. Run: streamlit run main.py
+  4. Dashboard opens at http://localhost:8501
+
+Option C: From Terminal
+  Windows (PowerShell):
+    .\start_dashboard.bat
+
+====================================================================
+USING THE DASHBOARD
+====================================================================
+
+ACCESSING THE APP:
+  - Open web browser
+  - Go to: http://localhost:8501
+  - Dashboard loads automatically
+
+NAVIGATION:
+  The dashboard has 3 main tabs:
+
+  1. ANALYTICS
+     - View brewery aggregation data
+     - Filter by country, state, brewery type
+     - Export results as CSV or JSON
+
+  2. OBSERVABILITY
+     - Monitor pipeline execution health
+     - Track success rates and error counts
+     - View execution trends and job performance
+
+  3. DATA QUALITY
+     - Monitor test results and failures
+     - Track data quality metrics
+     - Identify failing columns and tests
+
+SIDEBAR CONTROLS:
+  - Refresh All: Reload all data from Athena
+  - Clear Cache: Clear cached results
+  - About: Application information
+  - Tabs: Quick reference guide
+
+====================================================================
+TROUBLESHOOTING
+====================================================================
+
+Problem: "Cannot connect to AWS Athena"
+Solution:
+  - Verify AWS credentials are set correctly
+  - Check IAM permissions for Athena access
+  - Ensure S3 bucket exists and is accessible
+  - Check AWS_REGION matches your Athena region
+
+Problem: "ModuleNotFoundError"
+Solution:
+  - Verify virtual environment is activated
+  - Run: pip install -r requirements.txt
+  - Check Python version (3.8+)
+
+Problem: "Port 8501 already in use"
+Solution:
+  - Stop other Streamlit instances
+  - Or run: streamlit run main.py --server.port=8502
+
+Problem: Dashboard loads but shows no data
+Solution:
+  - Check Athena database and table names in environment variables
+  - Verify tables exist in Athena
+  - Check S3 output location permissions
+
+====================================================================
+PROJECT STRUCTURE
+====================================================================
+
+streamlit_app/
+├── main.py                 Main app entry point
+├── config.py              Centralized configuration
+├── gold_analytics.py      Analytics tab module
+├── logs_observability.py  Observability tab module
+├── data_quality.py        Data quality tab module
+└── utils/
+    ├── athena_service.py  AWS Athena integration
+    ├── parser_service.py  Data parsing utilities
+    ├── analytics_service.py Analytics calculations
+    ├── cache_manager.py   Caching utilities
+    └── logger.py          Logging configuration
+
+====================================================================
+ENVIRONMENT VARIABLES
+====================================================================
+
+REQUIRED:
+  AWS_REGION              AWS region (default: sa-east-1)
+
+OPTIONAL:
+  ATHENA_DATABASE         Gold database name (default: gold)
+  ATHENA_LOGS_DATABASE    Logs database name (default: logs)
+  ATHENA_S3_OUTPUT        S3 path for query results
+  LOG_LEVEL               Logging level (default: INFO)
+
+====================================================================
+SUPPORT & DOCUMENTATION
+====================================================================
+
+For issues or questions:
+1. Check troubleshooting section above
+2. Review code comments in Python files
+3. Check Athena documentation: https://aws.amazon.com/athena/
+
+Dashboard Author:
+  Bruno William da Silva
+  AWS Data Engineer | Medallion Architecture
+  
+  GitHub: https://github.com/brunobws/aws-api-capture-dl-medallion
+  LinkedIn: https://www.linkedin.com/in/brunowsilva/
+
+====================================================================

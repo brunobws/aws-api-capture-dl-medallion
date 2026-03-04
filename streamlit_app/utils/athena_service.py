@@ -1,13 +1,20 @@
-"""
-Fixed AWS Athena service with proper query execution flow.
+####################################################################
+# Author: Bruno William da Silva
+# Date: 03/03/2026
+#
+# Description:
+#   Fixed AWS Athena service with proper query execution flow.
+#   Handles connection, query execution, result retrieval, and error handling.
+#   Critical fix: Properly waits for query completion before fetching results.
+#
+#   Key Features:
+#   - Proper async query execution flow
+#   - Status polling with timeout
+#   - Paginated result retrieval
+#   - Health checks and error handling
+####################################################################
 
-Handles connection, query execution, result retrieval, and error handling.
-Critical fix: Properly waits for query completion before fetching results.
-
-Author: Data Team
-Version: 2.0.0
-"""
-
+########### imports ################
 import boto3
 import pandas as pd
 from typing import Optional, Dict, Any
@@ -18,6 +25,7 @@ from utils.config import (
     AWS_REGION, ATHENA_DATABASE, ATHENA_LOGS_DATABASE,
     ATHENA_S3_OUTPUT, ATHENA_QUERY_TIMEOUT_SECONDS
 )
+###################################
 
 logger = get_logger(__name__)
 
