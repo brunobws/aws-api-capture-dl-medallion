@@ -106,3 +106,19 @@ npm-debug.log
 query_results/
 athena_cache/
 temp/
+
+# SSH Keys
+*.pem
+
+# Logs
+logs/
+*.log
+
+# Python cache
+__pycache__/
+
+# Environment
+.env
+
+# Streamlit secrets
+.streamlit/secrets.toml
