@@ -144,7 +144,7 @@ def render_logs_observability(athena_service: AthenaService):
         st.metric("Total Executions", f"{total_execs:,}")
 
     with kpi_col2:
-        success_rate = AnalyticsService.success_rate(filtered_df, "status", "SUCCEEDED")
+        success_rate = AnalyticsService.success_rate(filtered_df, "status", "success")
         st.metric("Success Rate", f"{success_rate:.1f}%")
 
     with kpi_col3:
