@@ -51,7 +51,7 @@ def fetch_gold_data(athena_service: AthenaService) -> pd.DataFrame:
         nm_country,
         nm_state,
         ds_brewery_type,
-        nr_total_breweries
+        qtd_total_breweries
     FROM "{ATHENA_DATABASE}"."{GOLD_TABLE}"
     WHERE nm_country IS NOT NULL
     ORDER BY nm_country, nm_state, ds_brewery_type
