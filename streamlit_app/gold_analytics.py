@@ -44,7 +44,7 @@ def fetch_gold_data(athena_service: AthenaService) -> pd.DataFrame:
     Fetch complete brewery aggregation dataset from gold table.
     
     Returns:
-        DataFrame with all brewery data (nm_country, nm_state, ds_brewery_type, nr_total_breweries)
+        DataFrame with all brewery data (nm_country, nm_state, ds_brewery_type, qtd_total_breweries)
     """
     query = f"""
     SELECT
@@ -87,7 +87,7 @@ def render_gold_analytics(athena_service: AthenaService):
         return
 
     # Convert to proper types
-    df["nr_total_breweries"] = pd.to_numeric(df["nr_total_breweries"], errors="coerce")
+    df["qtd_total_breweries"] = pd.to_numeric(df["qtd_total_breweries"], errors="coerce")
 
     st.subheader("Filters")
 
@@ -159,7 +159,7 @@ def render_gold_analytics(athena_service: AthenaService):
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
 
     # Calculate KPIs from filtered data
-    total_breweries = filtered_df["nr_total_breweries"].sum()
+    total_breweries = filtered_df["qtd_total_breweries"].sum()
     total_countries = filtered_df["nm_country"].nunique()
     total_states = filtered_df["nm_state"].nunique()
     total_types = filtered_df["ds_brewery_type"].nunique()
@@ -189,17 +189,17 @@ def render_gold_analytics(athena_service: AthenaService):
 
         type_agg = (
             filtered_df.groupby("ds_brewery_type", as_index=False)
-            ["nr_total_breweries"].sum()
-            .sort_values("nr_total_breweries", ascending=False)
+            ["qtd_total_breweries"].sum()
+            .sort_values("qtd_total_breweries", ascending=False)
         )
 
         if not type_agg.empty:
             fig = px.bar(
                 type_agg,
                 x="ds_brewery_type",
-                y="nr_total_breweries",
+                y="qtd_total_breweries",
                 title="Total Breweries by Type",
-                labels={"ds_brewery_type": "Type", "nr_total_breweries": "Count"},
+                labels={"ds_brewery_type": "Type", "qtd_total_breweries": "Count"},
                 color_discrete_sequence=[COLOR_ORANGE],
                 height=CHART_HEIGHT
             )
@@ -215,19 +215,19 @@ def render_gold_analytics(athena_service: AthenaService):
 
         state_agg = (
             filtered_df.groupby("nm_state", as_index=False)
-            ["nr_total_breweries"].sum()
-            .sort_values("nr_total_breweries", ascending=False)
+            ["qtd_total_breweries"].sum()
+            .sort_values("qtd_total_breweries", ascending=False)
             .head(10)
         )
 
         if not state_agg.empty:
-            state_agg_sorted = state_agg.sort_values("nr_total_breweries", ascending=True)
+            state_agg_sorted = state_agg.sort_values("qtd_total_breweries", ascending=True)
             fig = px.bar(
                 state_agg_sorted,
                 y="nm_state",
-                x="nr_total_breweries",
+                x="qtd_total_breweries",
                 title="Top 10 States by Total Breweries",
-                labels={"nm_state": "State", "nr_total_breweries": "Count"},
+                labels={"nm_state": "State", "qtd_total_breweries": "Count"},
                 color_discrete_sequence=[COLOR_SUCCESS],
                 height=CHART_HEIGHT,
                 orientation="h"
@@ -246,7 +246,7 @@ def render_gold_analytics(athena_service: AthenaService):
     st.subheader("Detailed Data")
 
     display_df = filtered_df[
-        ["nm_country", "nm_state", "ds_brewery_type", "nr_total_breweries"]
+        ["nm_country", "nm_state", "ds_brewery_type", "qtd_total_breweries"]
     ].copy()
     display_df.columns = ["Country", "State", "Brewery Type", "Total Breweries"]
     display_df = display_df.sort_values("Total Breweries", ascending=False)
