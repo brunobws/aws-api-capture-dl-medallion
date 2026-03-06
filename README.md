@@ -83,9 +83,6 @@ bws-breweries-pipeline/
 │   ├── docker-compose.yml          # Docker services
 │   └── docker.env                  # Environment variables
 │
-├── tests/                           # ✅ Unit Tests
-│   └── test_streamlit_app.py
-│
 ├── docs/                            # 📚 Documentation
 │
 ├── requirements.txt                 # Python dependencies
@@ -229,23 +226,6 @@ docker-compose -f docker/docker-compose.yml down
 
 ---
 
-## 🧪 Testing
-
-Run unit tests:
-
-```bash
-# Using pytest
-pytest tests/ -v
-
-# Using make
-make test
-
-# With coverage
-pytest tests/ -v --cov=streamlit_app
-```
-
----
-
 ## 📝 Code Quality
 
 Format and lint code:
@@ -342,7 +322,6 @@ aws athena start-query-execution \
 - `apache-airflow-providers-amazon` - AWS integration
 
 ### Development
-- `pytest` - Testing
 - `black` - Code formatting
 - `flake8` - Linting
 
@@ -363,12 +342,11 @@ make aws-check
 
 Edit files in `streamlit_app/`
 
-### 3. Test
+### 3. Format and Lint
 
 ```bash
 make format
 make lint
-make test
 ```
 
 ### 4. Run
@@ -383,7 +361,7 @@ make run
 
 1. Create a feature branch
 2. Make changes following code style guide
-3. Run tests and linting
+3. Run linting
 4. Commit with descriptive messages
 5. Push and create pull request
 

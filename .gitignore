@@ -46,6 +46,11 @@ venv.bak/
 .streamlit/logger.toml
 .streamlit/cache/
 
+# Logs
+logs/
+*.log
+*.logs
+
 # AWS & Credentials
 .aws/
 *.pem
@@ -54,11 +59,6 @@ credentials
 .env
 .env.local
 .env.*.local
-
-# Logs
-logs/
-*.log
-*.logs
 
 # Data files
 *.csv
@@ -69,56 +69,19 @@ data/
 *.xls
 
 # OS
-.DS_Store
 Thumbs.db
-*.swp
-*.swo
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
 
 # MyPy
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# Jupyter
-.ipynb_checkpoints
-*.ipynb
-
-# Temporary files
-*.tmp
-*.temp
-*~
-
-# Node modules (if using Node.js)
-node_modules/
-npm-debug.log
 
 # Pyre
 .pyre/
 
 # Project specific
-query_results/
-athena_cache/
 temp/
 
 # SSH Keys
 *.pem
-
-# Logs
-logs/
-*.log
-
-# Python cache
-__pycache__/
-
-# Environment
-.env
-
-# Streamlit secrets
-.streamlit/secrets.toml
