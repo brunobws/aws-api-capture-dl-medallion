@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.lambda_function import LambdaInvokeFunctionOperator
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
+from airflow.operators.python import PythonOperator
 import json
 
 
@@ -13,6 +14,23 @@ default_args = {
     "retries": 2,
     "retry_delay": timedelta(minutes=2),
 }
+
+
+########## FUNCTION TO PARSE LAMBDA RESPONSE ##########
+
+def parse_lambda_response(ti):
+    response = ti.xcom_pull(task_ids="invoke_openbrewery_lambda")
+
+    # Lambda return comes as JSON string
+    payload = json.loads(response)
+
+    ingestion_date = payload["ingestion_date"]
+    filename = payload["filename"]
+
+    return {
+        "ingestion_date": ingestion_date,
+        "filename": filename
+    }
 
 
 ########## DAG ##########
@@ -28,7 +46,7 @@ with DAG(
     tags=["lambda", "glue", "medallion"],
 ) as dag:
 
-    ########## TASK 1 - INVOKE LAMBDA ##########
+    ########## INVOKE LAMBDA ##########
 
     invoke_lambda = LambdaInvokeFunctionOperator(
         task_id="invoke_openbrewery_lambda",
@@ -46,32 +64,43 @@ with DAG(
         aws_conn_id="aws_default",
     )
 
-    ########## TASK 2 - BRONZE TO SILVER ##########
+
+    ########## PARSE LAMBDA RESPONSE ##########
+
+    parse_lambda = PythonOperator(
+        task_id="parse_lambda_response",
+        python_callable=parse_lambda_response,
+    )
+
+
+    ########## BRONZE TO SILVER ##########
 
     bronze_to_silver = GlueJobOperator(
         task_id="bronze_to_silver",
         job_name="bronze_to_silver",
         script_args={
-            "--dt_ref": "{{ ti.xcom_pull(task_ids='invoke_openbrewery_lambda')['ingestion_date'] }}",
-            "--file_name": "{{ ti.xcom_pull(task_ids='invoke_openbrewery_lambda')['filename'] }}",
+            "--dt_ref": "{{ ti.xcom_pull(task_ids='parse_lambda_response')['ingestion_date'] }}",
+            "--file_name": "{{ ti.xcom_pull(task_ids='parse_lambda_response')['filename'] }}",
             "--target_table": "breweries_tb_breweries",
         },
         aws_conn_id="aws_default",
         wait_for_completion=True,
     )
 
-    ########## TASK 3 - SILVER TO GOLD ##########
+
+    ########## SILVER TO GOLD ##########
 
     silver_to_gold = GlueJobOperator(
         task_id="silver_to_gold",
         job_name="silver_to_gold",
         script_args={
-            "--target_table": "breweries_tb_breweries",
+            "--target_table": "breweries_tb_ft_breweries_agg",
         },
         aws_conn_id="aws_default",
         wait_for_completion=True,
     )
 
+
     ########## PIPELINE ORDER ##########
 
-    invoke_lambda >> bronze_to_silver >> silver_to_gold
+    invoke_lambda >> parse_lambda >> bronze_to_silver >> silver_to_gold

@@ -5,6 +5,8 @@ x-airflow-common: &airflow-common
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AWS_DEFAULT_REGION: sa-east-1
+
 
     # PERFORMANCE TUNING (LOW MEMORY)
     AIRFLOW__WEBSERVER__WORKERS: 1
