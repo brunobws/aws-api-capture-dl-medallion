@@ -41,7 +41,7 @@ The `Logs` class is responsible for structured execution logging across Lambda a
 
 Results land in the `execution_logs` Athena table:
 
-![Execution logs table on Athena](images/athena_execuion_logs_select_query.png)
+![Execution logs table on Athena](images/athena_execution_logs_select_query.png)
 
 ---
 
@@ -75,7 +75,7 @@ Provides three standardized templates: `send_email_on_failure` (red), `send_emai
 
 ![SES error notification email](images/error_ses_email.png)
 
-![SES success notification email](images/sucess_ses_email.png)
+![SES success notification email](images/success_ses_email.png)
 
 ### S3
 

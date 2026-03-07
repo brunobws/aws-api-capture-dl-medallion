@@ -150,7 +150,7 @@ Data quality validations are handled by the `Quality` module, built on top of [G
 
 This custom observability approach is the primary way to monitor the pipeline. CloudWatch is also active and captures infrastructure-level metrics for Lambda invocations and Glue job runs, but the execution and quality logs in Athena give far more context for debugging and auditing.
 
-![Execution logs table on Athena](images/athena_execuion_logs_select_query.png)
+![Execution logs table on Athena](images/athena_execution_logs_select_query.png)
 
 ![Data quality logs table on Athena](images/athena_quality_logs_select_query.png)
 
@@ -160,7 +160,7 @@ When a job fails or a quality check doesn't pass, an email is dispatched via [AW
 
 ![SES quality failure notification email](images/failure_quality_test_ses.png)
 
-![SES success notification email](images/sucess_ses_email.png)
+![SES success notification email](images/success_ses_email.png)
 
 > [!NOTE]
 > For full logging and quality module documentation, see [modules.md](modules.md).

@@ -106,7 +106,7 @@ GOLD_COLUMNS = {
     "nm_country": "Country",
     "nm_state": "State",
     "ds_brewery_type": "Brewery Type",
-    "nr_total_breweries": "Total Breweries",
+    "qtd_total_breweries": "Total Breweries",
 }
 
 ####################################################################

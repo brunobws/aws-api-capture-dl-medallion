@@ -5,7 +5,7 @@
 # Description:
 #   Lambda responsible for ingesting brewery data from the
 #   Open Brewery DB API into S3 (Bronze layer).
-#   Documentantion: https://openbrewerydb.org/documentation
+#   Documentation: https://openbrewerydb.org/documentation
 #
 # Environment Variables:
 #   S3_BUCKET     : (required) Target S3 bucket name
@@ -16,7 +16,7 @@
 #   RETRY_BACKOFF : (optional) Exponential backoff multiplier in seconds (default: 2.0)
 #  
 #   E-mails to alert:
-#    You have to 'notification_params' table in Dynamo DB
+#    Configure recipients in the 'notification_params' DynamoDB table
 #
 # Trigger:
 #   - Airflow Lambda Operator
@@ -118,7 +118,7 @@ def fetch_all_breweries() -> List[Dict[str, Any]]:
 
     if total == 0:
 
-        logger.warning(warning_mg='empty api response')
+        logger.warning(warning_msg='empty api response')
         logger.write_log()
 
         raise ValueError("API returned total=0 from /meta. Aborting ingestion.")

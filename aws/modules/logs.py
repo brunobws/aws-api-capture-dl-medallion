@@ -56,7 +56,7 @@ class Logs:
             target_table (str): Fully qualified target table name
                                 (e.g. 'breweries_tb_breweries').
             layer (str): Processing layer the job belongs to
-                         ('acquisition', 'raw', 'trusted', 'refined', 'quality').
+                         ('bronze', 'silver', 'gold', 'quality').
             env (str): Deployment environment ('prd', 'dev', etc.).
             table (str): Athena/S3 log table name (default 'execution_logs').
             technology (str): Writer technology — 'glue' uses pandas.to_parquet,

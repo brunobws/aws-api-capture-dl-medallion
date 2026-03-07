@@ -45,7 +45,7 @@ def summarize_exception(e: Exception) -> str:
         str: String representation of a structured error summary dict,
              or an empty string if the exception should be suppressed.
     """
-    if not e or str(e).lower() == "arquivo_vazio":
+    if not e or str(e).lower() == "empty_file":
         return ""
 
     # Distinguish between Spark/JVM errors and pure Python errors
@@ -114,7 +114,7 @@ def write_error_logs(
     and raises an exception to halt the current job execution.
 
     Skips the email notification for empty-file sentinel errors
-    (where str(e) == 'arquivo vazio') to avoid spurious alerts.
+    (where str(e) == 'empty_file') to avoid spurious alerts.
 
     Args:
         logger: Job logger instance for structured error recording.
@@ -131,7 +131,7 @@ def write_error_logs(
         Exception: Always raised with the combined error message and cause.
     """
     # Send failure email unless this is an empty-file sentinel error
-    if destination and str(e) != "arquivo vazio":
+    if destination and str(e) != "empty_file":
         super.send_email_on_failure(
             target_table=target_tbl,
             description=error_msg,

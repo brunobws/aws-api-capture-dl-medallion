@@ -102,7 +102,7 @@ class Ses:
             <li><strong>Environment: </strong>{env}</li>
         </ul>
         <p>Regards,</p>
-        <p><strong>Data Engineering - IN 2.0</strong></p>
+        <p><strong>Data Engineering - Brewery Data Lake</strong></p>
         </body>
         </html>"""
 
@@ -511,7 +511,7 @@ class Athena(Ses):
         super().__init__(job_name, self.logger, env=self.env)
         self.super_ses = super()
 
-    def _availabe_query(self, execution_id: str) -> None:
+    def _available_query(self, execution_id: str) -> None:
         """
         Polls Athena until the given query execution reaches a terminal state.
 
@@ -606,7 +606,7 @@ class Athena(Ses):
             tuple: A (columns, data_rows) tuple — columns is a list of
                    column name strings; data_rows is a list of row value lists.
         """
-        output_bucket = f"s3://afz-logs-sa1-{self.env}/athena/query_results/"
+        output_bucket = f"s3://bws-dl-logs-sae1-{self.env}/athena/query_results/"
 
         response = self.athena_client.start_query_execution(
             QueryString=query,
@@ -617,7 +617,7 @@ class Athena(Ses):
 
         execution_id = response["QueryExecutionId"]
 
-        self._availabe_query(execution_id=execution_id)
+        self._available_query(execution_id=execution_id)
 
         print("Athena query completed successfully.")
 
@@ -675,7 +675,7 @@ class Pyathena(Ses):
         Returns:
             cursor: PyAthena cursor ready for query execution.
         """
-        staging_dir = f"s3://afz-logs-sa1-{self.env}/athena/query_results/"
+        staging_dir = f"s3://bws-dl-logs-sae1-{self.env}/athena/query_results/"
         print(f"PyAthena staging directory: {staging_dir}")
 
         cursor = connect(s3_staging_dir=staging_dir).cursor()

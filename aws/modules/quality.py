@@ -383,7 +383,7 @@ class Quality(AwsManager):
                 db_port=ssm_secret["port"],
                 db_name=ssm_secret["dbname"],
                 db_user=ssm_secret["user"],
-                db_psswd=ssm_secret["senha"],
+                db_psswd=ssm_secret["password"],
                 query=params.get("db_query"),
                 technology=params.get("technology"),
             )
@@ -427,7 +427,7 @@ class Quality(AwsManager):
                 db_port=ssm_secret["port"],
                 db_name=ssm_secret["dbname"],
                 db_user=ssm_secret["user"],
-                db_psswd=ssm_secret["senha"],
+                db_psswd=ssm_secret["password"],
                 query=params.get("db_query"),
                 technology=params.get("technology"),
             )
@@ -575,7 +575,7 @@ class Quality(AwsManager):
                 db_port=ssm_secret["port"],
                 db_name=ssm_secret["dbname"],
                 db_user=ssm_secret["user"],
-                db_psswd=ssm_secret["senha"],
+                db_psswd=ssm_secret["password"],
                 query=query_db,
                 technology=params.get("technology"),
             )

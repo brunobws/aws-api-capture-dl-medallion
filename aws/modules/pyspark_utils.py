@@ -368,7 +368,7 @@ class Pyspark(S3):
                 df_aux = df
 
                 # Fetch the substring extraction script from S3 artifacts bucket
-                bucket = f"afz-artifacts-sa1-{self.env}"
+                bucket = f"bws-artifacts-sae1-{self.env}"
                 table, source = split_target_table(self.trgt_tbl)
                 key = f"support/{source}/{table}/substring_{table}.txt"
                 response = super().get_s3_file(bucket=bucket, key=key)
