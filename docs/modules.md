@@ -201,3 +201,22 @@ It is the main driver of data reading and writing inside `bronze_to_silver`. The
 | **Literal columns** | Adds computed or static literal columns via `lit_values` — including values extracted from raw file header rows. |
 | **Writing** | Writes DataFrames to Athena/Iceberg Silver tables partitioned by the configured column. Supports `overwrite` and `append` modes. |
 | **JDBC** | Connects to relational databases (SQL Server, Oracle, PostgreSQL) via JDBC using credentials from SSM — used by the cross-system quality check. |
+
+---
+
+## support.py
+
+Source: [aws/modules/support.py](../aws/modules/support.py)
+
+`support.py` provides standalone helper functions shared across all Glue jobs and Lambda functions. Unlike the other modules, it contains no classes — just pure functions imported individually where needed.
+
+**Functions:**
+
+| Function | What it does |
+|---|---|
+| `summarize_exception(e)` | Inspects a Python or PySpark/JVM exception and returns a structured summary string with error type, message, line number, and origin context. Suppresses the `empty_file` sentinel silently. |
+| `get_date_and_time()` | Returns the current timestamp adjusted to UTC-3, formatted as `YYYY-MM-DD HH:MM:SS`. Used to stamp log records. |
+| `split_target_table(target_table)` | Parses a `source_table_name` identifier into its `(table_name, source)` components by splitting on the first underscore segment. |
+| `write_error_logs(...)` | Logs a structured error via the job logger, optionally sends a failure email via SES, and always raises an exception to halt execution. Skips the email for `empty_file` sentinel errors. |
+| `eval_values(value, ...)` | Converts DynamoDB-stored string parameters (`"true"`, `"false"`, dicts, lists) into native Python types using `eval()`. Falls back to error logging and SES notification on parsing failure. |
+
