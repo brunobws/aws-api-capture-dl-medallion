@@ -134,7 +134,8 @@ You cannot:
 - [Architecture](docs/architecture.md) – Design patterns, data flow, component details
 - [AWS Setup](docs/aws_setup.md) – Services, IAM policies, configuration
 - [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
-- [Monitoring & Alerting](docs/monitoring.md) – CloudWatch metrics, health checks, incident response
+- [Modules](docs/modules.md) – Shared Python modules: Logs, Quality, AwsManager
+- [DynamoDB Parameters](docs/dynamo_params.md) – Pipeline configuration tables
 
 <a id="code-organization"></a>
 

@@ -4,9 +4,7 @@ This document walks through the full data pipeline — from raw API ingestion to
 
 ## Architecture Diagram
 
-<iframe width="768" height="496" src="https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
-
-For a clearer view, open the [interactive Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
+For an interactive view, open the [Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
 
 ![Architecture Diagram](images/architecture-diagram.jpeg)
 
@@ -14,11 +12,13 @@ For a clearer view, open the [interactive Miro board](https://miro.com/app/live-
 
 ## Orchestration — Airflow
 
-[Apache Airflow](https://airflow.apache.org/) runs on an [EC2](https://docs.aws.amazon.com/ec2/latest/userguide/concepts.html) instance and is the central orchestrator for the entire pipeline.
+[Apache Airflow](https://airflow.apache.org/) is the central orchestrator for the entire pipeline. It runs inside a **Docker container** on an [EC2](https://docs.aws.amazon.com/ec2/latest/userguide/concepts.html) instance, which keeps the runtime environment consistent and portable without needing to install dependencies directly on the host. The EC2 instance uses a fixed [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html), so the address never changes between restarts.
 
-The DAG `brewery_pipeline` is scheduled to run daily at **7:00 AM UTC**, firing each step in sequence and passing outputs between tasks through [XCom](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/xcoms.html).
+The Airflow web UI is accessible on port **8080**, kept private via the EC2 security group — only authorized access is allowed. The Streamlit dashboard shares the same EC2 instance and Elastic IP, exposed on port **8501** to the public.
 
-**Version:** Apache Airflow 2.10.3
+The DAG `brewery_pipeline` runs daily at **7:00 AM UTC**, firing each step in sequence and passing outputs between tasks through [XCom](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/xcoms.html).
+
+**Version:** Apache Airflow 2.10.3  
 **Providers:** [apache-airflow-providers-amazon](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html) 8.26.0
 
 The pipeline has four tasks:
@@ -50,9 +50,10 @@ After the upload completes, the function returns `filename` and `ingestion_date`
 
 **Retry logic:** On HTTP errors or timeouts, each request retries up to 3 times with exponential backoff before raising an exception.
 
-**Notifications** are configured via the `notification_params` table in [DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html). This table controls which email addresses receive alerts on failure, warning, or success. See [aws/dynamo_params.md](../aws/dynamo_params.md) for the full parameter reference.
+**Notifications** are configured via the `notification_params` table in [DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html). This table controls which email addresses receive alerts on failure, warning, or success.
 
-Uses the shared `utils` and `logs` modules. See [aws/modules.md](../aws/modules.md) for details.
+> [!NOTE]
+> For DynamoDB parameter details, see [dynamo_params.md](dynamo_params.md). For shared module documentation, see [modules.md](modules.md).
 
 Script: [aws/lambda_scripts/BronzeApiCaptureBreweries.py](../aws/lambda_scripts/BronzeApiCaptureBreweries.py)
 
@@ -73,15 +74,16 @@ Data is written to the Silver bucket partitioned by **country** and **state**, s
 **What this job does:**
 - Reads the exact file passed by Airflow (`--file_name` and `--dt_ref`)
 - Applies schema casting, null handling, and column standardization
-- Runs data quality checks configured in DynamoDB (`quality_params`) using the [Quality module](../aws/modules/quality.py)
+- Runs data quality checks configured in DynamoDB (`quality_params`) using the Quality module
 - Writes the clean result as Parquet, partitioned by country and state
 
 **Designed as a generic processing engine:**
 This job reads all its configuration from DynamoDB (`ingestion_params`) — source paths, schema definitions, quality rules. Pass it different parameters and it processes a completely different dataset without any code changes. This makes it reusable across multiple ingestion pipelines.
 
-An Athena table is already set up pointing at the Silver bucket. A query screenshot will be added once available.
+![Silver table query on Athena](images/athena_silver_select_query.png)
 
-Uses the `utils`, `logs`, and `quality` modules. See [aws/modules.md](../aws/modules.md) for details. For DynamoDB parameters, see [aws/dynamo_params.md](../aws/dynamo_params.md).
+> [!NOTE]
+> For DynamoDB parameter details, see [dynamo_params.md](dynamo_params.md). For shared module documentation, see [modules.md](modules.md).
 
 Script: [aws/glue_scripts/bronze_to_silver.py](../aws/glue_scripts/bronze_to_silver.py)
 
@@ -91,21 +93,64 @@ Script: [aws/glue_scripts/bronze_to_silver.py](../aws/glue_scripts/bronze_to_sil
 
 The [Glue](https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html) job `silver_to_gold` reads clean Silver data and produces a pre-aggregated table in the Gold layer. Instead of hardcoding the transformation logic inside the job, the SQL query is stored as a `.sql` file in S3 and loaded at runtime. This keeps business logic versioned and separated from execution code.
 
-The job runs that SQL against the Glue/Iceberg catalog inside a Spark environment and writes results to an [Apache Iceberg](https://iceberg.apache.org/) table.
-
-**Why Iceberg?**
-Iceberg is an open table format designed for large-scale data lakes. It adds ACID transactions, schema evolution, and time-travel queries on top of S3-backed storage — making the Gold layer reliable and queryable with standard SQL tools like Athena. More on [Iceberg's benefits here](https://iceberg.apache.org/docs/latest/).
+The job runs that SQL against the Glue/Iceberg catalog inside a Spark environment and writes results to an [Apache Iceberg](https://iceberg.apache.org/) table. Iceberg is an open table format built for data lakes — it brings ACID transactions, schema evolution, and time-travel queries on top of S3, making the Gold layer safe to overwrite and consistent to query from Athena. More on [why Iceberg here](https://iceberg.apache.org/docs/latest/).
 
 **What the SQL does:**
 Groups breweries by country, state, and brewery type, counting how many exist per combination. This powers the main analytics view in the Streamlit dashboard.
 
 SQL file: [aws/sql/gold/tb_ft_breweries_agg.sql](../aws/sql/gold/tb_ft_breweries_agg.sql)
 
+**Column naming conventions:**
+The Gold table follows a structured naming convention to make the schema self-explanatory and governance-friendly. Column prefixes communicate the nature of each field at a glance:
+- `nm_` — name or descriptive label (e.g. `nm_country`, `nm_state`, `ds_brewery_type`)
+- `qtd_` — quantity or count (e.g. `qtd_total_breweries`)
+
+This is a deliberate practice carried through the table creation DDL, which also includes proper Iceberg table properties — setting the correct format version, table optimization configurations, and Athena-compatible metadata parameters so both engines read the table without issues.
+
+![Gold table query on Athena](images/athena_gold_select_query.png)
+
+![Gold table DDL — Iceberg table creation](images/athena_gold_show_ddl_table.png)
+
 **Also a generic engine:**
 Like the Bronze to Silver job, configuration is pulled from DynamoDB (`refined_params`). Point it at a different SQL file and target table and it processes an entirely different aggregation without touching the code.
 
-An Athena table is already set up pointing at the Gold bucket. A query screenshot will be added once available.
-
-Uses the `utils`, `logs`, and `quality` modules. See [aws/modules.md](../aws/modules.md) for details. For DynamoDB parameters, see [aws/dynamo_params.md](../aws/dynamo_params.md).
+> [!NOTE]
+> For DynamoDB parameter details, see [dynamo_params.md](dynamo_params.md). For shared module documentation, see [modules.md](modules.md).
 
 Script: [aws/glue_scripts/silver_to_gold.py](../aws/glue_scripts/silver_to_gold.py)
+
+---
+
+## Dashboard — Streamlit
+
+After the Gold layer is ready, the data is immediately available for the Streamlit dashboard. The application runs in a **Docker container** on the same EC2 instance as Airflow, using the same Elastic IP — accessible on port **8501** and open to the public.
+
+The dashboard has three main sections: analytics with filters and charts, pipeline observability, and data quality results.
+
+> [!NOTE]
+> For full dashboard documentation, see [dashboard.md](dashboard.md).
+
+---
+
+## Security
+
+Access control is handled through [AWS IAM](https://docs.aws.amazon.com/iam/latest/userguide/introduction.html) roles and policies, following the principle of least privilege. Each service (Lambda, Glue, EC2) has its own IAM role with only the permissions it actually needs.
+
+The EC2 instance sits inside a [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) with a [security group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) that controls which ports and IPs can reach it. Port 8080 (Airflow) is private; port 8501 (Streamlit) is public. A fixed [Elastic IP](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html) ensures the instance address stays stable. All S3 data is encrypted at rest and DynamoDB tables use AWS KMS.
+
+---
+
+## Observability — Logs & Data Quality
+
+Every component in the pipeline — Lambda and both Glue jobs — uses a centralized `Logs` module to write structured execution records to a dedicated Athena table (`execution_logs`), partitioned by execution date. Each record includes the job name, target table, layer, execution status, step-level timing, and any warnings or errors captured during the run.
+
+Data quality validations are handled by the `Quality` module, built on top of [Great Expectations](https://docs.greatexpectations.io/). It runs configurable checks — null rates, uniqueness, regex patterns, range validations — and writes the results to a separate `data_quality_logs` table in Athena. On failure or warning, it sends an email notification via SES and can optionally halt the job.
+
+This custom observability approach is the primary way to monitor the pipeline. CloudWatch is also active and captures infrastructure-level metrics for Lambda invocations and Glue job runs, but the execution and quality logs in Athena give far more context for debugging and auditing.
+
+![Execution logs table on Athena](images/athena_execuion_logs_select_query.png)
+
+![Data quality logs table on Athena](images/athena_quality_logs_select_query.png)
+
+> [!NOTE]
+> For full logging and quality module documentation, see [modules.md](modules.md).
