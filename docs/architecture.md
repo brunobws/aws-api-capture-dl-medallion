@@ -127,6 +127,8 @@ After the Gold layer is ready, the data is immediately available for the Streaml
 
 The dashboard has three main sections: analytics with filters and charts, pipeline observability, and data quality results.
 
+![Streamlit Dashboard](images/dashboard-screenshot.png)
+
 > [!NOTE]
 > For full dashboard documentation, see [dashboard.md](dashboard.md).
 
