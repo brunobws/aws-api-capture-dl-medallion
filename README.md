@@ -23,7 +23,7 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 
 <a id="live-dashboard"></a>
 
-## Live Dashboard 📊
+## Live Dashboard 
 
 **Access the dashboard:** http://56.124.50.116:8501/
 
@@ -45,7 +45,7 @@ For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
 <a id="architecture-overview"></a>
 
-## Architecture Overview 🏗️
+## Architecture Overview 
 
 ![Brewery Data Lake Architecture](docs/images/architecture-diagram.jpeg)
 
@@ -110,7 +110,7 @@ You cannot:
 
 <a id="key-features"></a>
 
-## Key Features ✨
+## Key Features 
 
 **Modularized Logging** – All components (Lambda, Glue jobs) use a [centralized Logs class](aws/modules/logs.py) that writes structured execution records with step-level timing to an Athena table. Each log includes job name, status, warnings, errors, and custom metadata.
 
@@ -148,7 +148,7 @@ You cannot:
 
 <a id="infrastructure--security"></a>
 
-## Infrastructure & Security 🔒
+## Infrastructure & Security 
 
 **Serverless Design** – [Lambda](https://docs.aws.amazon.com/lambda/), [Glue](https://docs.aws.amazon.com/glue/), and [Athena](https://docs.aws.amazon.com/athena/) scale automatically with zero infrastructure management. Pay only for what you use.
 
@@ -164,7 +164,7 @@ See [AWS Setup Guide](docs/aws_setup.md) for detailed security configuration and
 
 <a id="roadmap"></a>
 
-## Roadmap 🚀
+## Roadmap 
 
 Future enhancements planned for this project:
 
