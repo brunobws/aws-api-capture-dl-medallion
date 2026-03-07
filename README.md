@@ -44,9 +44,9 @@ Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 3. **Silver Layer** – AWS Glue applies PySpark transformations: clean column names, handle nulls, remove duplicates, partition by location, store as [Parquet](https://parquet.apache.org/) for efficient columnar storage
 4. **Gold Layer** – AWS Glue creates pre-aggregated analytics: count of breweries by type and location, stored in [Apache Iceberg](https://iceberg.apache.org/) format for ACID transactions
 5. **Execution Logging** – Each component (Lambda, Glue jobs) writes structured execution logs to a centralized Athena table `execution_logs`, partitioned by execution date, with step-level timing
-6. **Data Quality** – Automated validation tests for completeness, accuracy, and consistency across all layers; quality results stored in Athena
-7. **Email Alerts** – Configurable email notifications on failures and warnings, managed via DynamoDB `notification_params` table
-8. **Monitoring** – [AWS CloudWatch](https://docs.aws.amazon.com/cloudwatch/) captures infrastructure metrics and logs; dashboard displays pipeline health in real-time
+6. **Data Quality** – Automated validation tests for completeness, accuracy, and consistency across all layers; quality results stored in a dedicated Athena `data_quality_logs` table with pass/fail status and email notifications
+7. **Email Alerts** – Configurable email notifications on failures and warnings using [AWS SES](https://docs.aws.amazon.com/ses/), managed via DynamoDB `notification_params` table
+8. **Monitoring** – All pipeline components write structured logs to a centralized Athena `execution_logs` table, partitioned by execution date; [AWS CloudWatch](https://docs.aws.amazon.com/cloudwatch/) captures infrastructure metrics for real-time visibility
 
 ## Cloud Setup
 
@@ -65,6 +65,13 @@ With read-only access, you can:
 - Query Athena tables: Gold layer analytics, execution logs, data quality results
 - Explore table schemas in AWS Glue Catalog
 - View pipeline execution records and audit trails
+- Access DynamoDB parameter tables to see configuration and notification settings
+- View registered email addresses in Amazon SES
+
+You cannot:
+- Delete, edit, or create any resources
+- Access any services outside of S3, Athena, Glue Catalog, DynamoDB, and SES
+- Access any AWS regions outside the current one
 
 ## Technology Stack
 
@@ -115,7 +122,7 @@ With read-only access, you can:
 
 **EC2 Services** – Streamlit dashboard and Apache Airflow run on dedicated EC2 instances for 24/7 availability.
 
-**Security Controls** – Read-only IAM user provided for safe exploration. All S3 data encrypted at rest using [AWS KMS](https://docs.aws.amazon.com/kms/). No credentials hardcoded in repositories; all credentials loaded from EC2 IAM roles or [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/).
+**Security Controls** – Read-only IAM user provided for safe exploration. All S3 data encrypted at rest using [AWS SSE](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerSideEncryption.html). DynamoDB tables encrypted using [AWS KMS](https://docs.aws.amazon.com/kms/). Public API (no authentication secrets required). All credentials for internal services loaded from EC2 IAM roles.
 
 **Audit Logging** – [CloudWatch](https://docs.aws.amazon.com/cloudwatch/) captures all API calls and data access for compliance and troubleshooting.
 
