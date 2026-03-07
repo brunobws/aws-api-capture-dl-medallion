@@ -9,19 +9,21 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 
 ## Table of Contents
 
-[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-0066FF?style=for-the-badge)](#live-dashboard-)
-[![Architecture](https://img.shields.io/badge/Architecture-FF9900?style=for-the-badge)](#architecture-overview-)
-[![How It Works](https://img.shields.io/badge/How_It_Works-28A745?style=for-the-badge)](#how-it-works-)
-[![Cloud Setup](https://img.shields.io/badge/Cloud_Setup-6F42C1?style=for-the-badge)](#cloud-setup-)
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-0066FF?style=for-the-badge)](#live-dashboard)
+[![Architecture](https://img.shields.io/badge/Architecture-FF9900?style=for-the-badge)](#architecture-overview)
+[![How It Works](https://img.shields.io/badge/How_It_Works-28A745?style=for-the-badge)](#how-it-works)
+[![Cloud Setup](https://img.shields.io/badge/Cloud_Setup-6F42C1?style=for-the-badge)](#cloud-setup)
 [![Technology Stack](https://img.shields.io/badge/Technology_Stack-17A2B8?style=for-the-badge)](#technology-stack)
-[![Key Features](https://img.shields.io/badge/Key_Features-E83E8C?style=for-the-badge)](#key-features-)
+[![Key Features](https://img.shields.io/badge/Key_Features-E83E8C?style=for-the-badge)](#key-features)
 [![Documentation](https://img.shields.io/badge/Documentation-FD7E14?style=for-the-badge)](#documentation)
-[![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization-)
-[![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security-)
-[![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap-)
-[![Contact](https://img.shields.io/badge/Questions_&_Feedback-343A40?style=for-the-badge)](#questions-or-feedback-)
+[![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization)
+[![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security)
+[![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap)
+[![Contact](https://img.shields.io/badge/Questions_&_Feedback-343A40?style=for-the-badge)](#questions-or-feedback)
 
-## Live Dashboard 
+<a id="live-dashboard"></a>
+
+## Live Dashboard 📊
 
 **Access the dashboard:** http://56.124.50.116:8501/
 
@@ -41,7 +43,9 @@ Watch demo videos to see the dashboard in action:
 
 For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
-## Architecture Overview 
+<a id="architecture-overview"></a>
+
+## Architecture Overview 🏗️
 
 ![Brewery Data Lake Architecture](docs/images/architecture-diagram.jpeg)
 
@@ -49,7 +53,9 @@ For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
 For an interactive architecture diagram, see the [live Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
 
-## How It Works 
+<a id="how-it-works"></a>
+
+## How It Works ⚙️
 
 Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 
@@ -61,6 +67,8 @@ Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 6. **Data Quality** – Automated validation tests for completeness, accuracy, and consistency across all layers; quality results stored in a dedicated Athena `data_quality_logs` table with pass/fail status and email notifications
 7. **Email Alerts** – Configurable email notifications on failures and warnings using [AWS SES](https://docs.aws.amazon.com/ses/), managed via DynamoDB `notification_params` table
 8. **Monitoring** – All pipeline components write structured logs to a centralized Athena `execution_logs` table, partitioned by execution date; [AWS CloudWatch](https://docs.aws.amazon.com/cloudwatch/) captures infrastructure metrics for real-time visibility
+
+<a id="cloud-setup"></a>
 
 ## Cloud Setup ☁️
 
@@ -87,6 +95,8 @@ You cannot:
 - Access any services outside of S3, Athena, Glue Catalog, DynamoDB, and SES
 - Access any AWS regions outside the current one
 
+<a id="technology-stack"></a>
+
 ## Technology Stack
 
 | Component | Technology |
@@ -98,7 +108,9 @@ You cannot:
 | **Storage** | [Parquet](https://parquet.apache.org/), [Apache Iceberg](https://iceberg.apache.org/) |
 | **Logging** | AWS CloudWatch, S3, Athena |
 
-## Key Features ⚙️
+<a id="key-features"></a>
+
+## Key Features ✨
 
 **Modularized Logging** – All components (Lambda, Glue jobs) use a [centralized Logs class](aws/modules/logs.py) that writes structured execution records with step-level timing to an Athena table. Each log includes job name, status, warnings, errors, and custom metadata.
 
@@ -114,6 +126,8 @@ You cannot:
 
 **DynamoDB Configuration** – Pipeline parameters, notification settings, and job configurations stored in DynamoDB tables for easy management without code changes.
 
+<a id="documentation"></a>
+
 ## Documentation
 
 - [Architecture](docs/architecture.md) – Design patterns, data flow, security model
@@ -122,7 +136,9 @@ You cannot:
 - [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
 - [Monitoring & Alerting](docs/monitoring.md) – CloudWatch metrics, health checks, incident response
 
-## Code Organization 
+<a id="code-organization"></a>
+
+## Code Organization 📂
 
 - [Lambda Scripts](aws/lambda_scripts/) – API ingestion and S3 cleanup
 - [Glue ETL Jobs](aws/glue_scripts/) – Bronze→Silver→Gold transformations
@@ -130,7 +146,9 @@ You cannot:
 - [Airflow DAG](dags/brewery_pipeline.py) – Pipeline orchestration
 - [Streamlit Dashboard](streamlit_app/) – Analytics interface
 
-## Infrastructure & Security 
+<a id="infrastructure--security"></a>
+
+## Infrastructure & Security 🔒
 
 **Serverless Design** – [Lambda](https://docs.aws.amazon.com/lambda/), [Glue](https://docs.aws.amazon.com/glue/), and [Athena](https://docs.aws.amazon.com/athena/) scale automatically with zero infrastructure management. Pay only for what you use.
 
@@ -144,7 +162,9 @@ See [AWS Setup Guide](docs/aws_setup.md) for detailed security configuration and
 
 ---
 
-## Roadmap 
+<a id="roadmap"></a>
+
+## Roadmap 🚀
 
 Future enhancements planned for this project:
 
@@ -154,6 +174,8 @@ Future enhancements planned for this project:
 - **Service Access Links** – User-friendly direct links to Airflow UI and Streamlit dashboard management
 
 ---
+
+<a id="questions-or-feedback"></a>
 
 ## Questions or Feedback? 💬
 
