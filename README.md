@@ -7,7 +7,21 @@
 
 A production-grade data lake that ingests brewery data from the [Open Brewery DB API](https://openbrewerydb.org/), transforms it through a three-tier Medallion Architecture, and serves analytics via a Streamlit dashboard. Built on AWS with modularized logging, automated data quality testing, and email notifications for pipeline failures.
 
-## Live Dashboard 📊
+## Table of Contents
+
+- [Live Dashboard](#live-dashboard-)
+- [Architecture Overview](#architecture-overview-)
+- [How It Works](#how-it-works-)
+- [Cloud Setup](#cloud-setup-)
+- [Technology Stack](#technology-stack)
+- [Key Features](#key-features-)
+- [Documentation](#documentation)
+- [Code Organization](#code-organization-)
+- [Infrastructure & Security](#infrastructure--security-)
+- [Roadmap](#roadmap-)
+- [Questions or Feedback?](#questions-or-feedback-)
+
+## Live Dashboard 
 
 **Access the dashboard:** http://56.124.50.116:8501/
 
@@ -84,7 +98,7 @@ You cannot:
 | **Storage** | [Parquet](https://parquet.apache.org/), [Apache Iceberg](https://iceberg.apache.org/) |
 | **Logging** | AWS CloudWatch, S3, Athena |
 
-## Key Features ✨
+## Key Features ⚙️
 
 **Modularized Logging** – All components (Lambda, Glue jobs) use a [centralized Logs class](aws/modules/logs.py) that writes structured execution records with step-level timing to an Athena table. Each log includes job name, status, warnings, errors, and custom metadata.
 
