@@ -16,6 +16,7 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 [![Technology Stack](https://img.shields.io/badge/Technology_Stack-17A2B8?style=for-the-badge)](#technology-stack)
 [![Key Features](https://img.shields.io/badge/Key_Features-E83E8C?style=for-the-badge)](#key-features)
 [![Documentation](https://img.shields.io/badge/Documentation-FD7E14?style=for-the-badge)](#documentation)
+
 [![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization)
 [![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security)
 [![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap)
@@ -130,8 +131,7 @@ You cannot:
 
 ## Documentation
 
-- [Architecture](docs/architecture.md) – Design patterns, data flow, security model
-- [Airflow Orchestration](docs/airflow.md) – DAG structure, dependencies, scheduling
+- [Architecture](docs/architecture.md) – Design patterns, data flow, component details
 - [AWS Setup](docs/aws_setup.md) – Services, IAM policies, configuration
 - [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
 - [Monitoring & Alerting](docs/monitoring.md) – CloudWatch metrics, health checks, incident response
