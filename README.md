@@ -9,17 +9,17 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 
 ## Table of Contents
 
-- [Live Dashboard](#live-dashboard-)
-- [Architecture Overview](#architecture-overview-)
-- [How It Works](#how-it-works-)
-- [Cloud Setup](#cloud-setup-)
-- [Technology Stack](#technology-stack)
-- [Key Features](#key-features-)
-- [Documentation](#documentation)
-- [Code Organization](#code-organization-)
-- [Infrastructure & Security](#infrastructure--security-)
-- [Roadmap](#roadmap-)
-- [Questions or Feedback?](#questions-or-feedback-)
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-0066FF?style=for-the-badge)](#live-dashboard-)
+[![Architecture](https://img.shields.io/badge/Architecture-FF9900?style=for-the-badge)](#architecture-overview-)
+[![How It Works](https://img.shields.io/badge/How_It_Works-28A745?style=for-the-badge)](#how-it-works-)
+[![Cloud Setup](https://img.shields.io/badge/Cloud_Setup-6F42C1?style=for-the-badge)](#cloud-setup-)
+[![Technology Stack](https://img.shields.io/badge/Technology_Stack-17A2B8?style=for-the-badge)](#technology-stack)
+[![Key Features](https://img.shields.io/badge/Key_Features-E83E8C?style=for-the-badge)](#key-features-)
+[![Documentation](https://img.shields.io/badge/Documentation-FD7E14?style=for-the-badge)](#documentation)
+[![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization-)
+[![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security-)
+[![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap-)
+[![Contact](https://img.shields.io/badge/Questions_&_Feedback-343A40?style=for-the-badge)](#questions-or-feedback-)
 
 ## Live Dashboard 
 
