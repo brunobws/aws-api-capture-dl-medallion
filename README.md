@@ -1,103 +1,201 @@
-# AWS Breweries Data Pipeline & Dashboard
+# AWS Breweries Data Lake & Analytics Platform
 
-![Status](https://img.shields.io/badge/status-active-brightgreen)
-![Python](https://img.shields.io/badge/python-3.9+-blue)
-![AWS](https://img.shields.io/badge/AWS-Athena-orange)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red)
+![AWS](https://img.shields.io/badge/AWS-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-623CE4?style=for-the-badge&logo=terraform&logoColor=white)
 
-Comprehensive data pipeline and interactive dashboard for brewery data aggregation using Apache Airflow, AWS Lambda, AWS Athena, and Streamlit.
+A comprehensive data lake architecture built on AWS, implementing the Medallion Architecture pattern for brewery data analytics. This project showcases modern data engineering practices with automated pipelines, real-time monitoring, and interactive dashboards.
 
-## 📋 Overview
+## 🏗️ Architecture
 
-This project consists of two main components:
+Our data lake follows the Medallion Architecture, processing data through Bronze, Silver, and Gold layers for optimal analytics performance.
 
-### 1. **Data Pipeline** (Airflow + AWS Lambda)
-- Orchestrates daily data ingestion from Open Brewery API
-- Stores raw data in S3 Bronze layer
-- Scheduled pipeline with automatic retries and error handling
-- Built with Apache Airflow 2.10.3
+<iframe width="768" height="496" src="https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
 
-### 2. **Interactive Dashboard** (Streamlit)
-- Web-based interface for querying brewery data
-- Direct connection to AWS Athena
-- Real-time data visualization and statistics
-- Multi-format data export (CSV, JSON, Parquet)
+For detailed architecture documentation, see [docs/architecture.md](docs/architecture.md).
 
----
+## 📊 Data Pipeline Overview
 
-## 🚀 Quick Start
+The pipeline orchestrates end-to-end data processing from API ingestion to analytics-ready datasets:
 
-### Quick Start - Dashboard Only
+1. **API Ingestion**: Lambda functions collect brewery data from external APIs
+2. **Bronze Layer**: Raw data storage with initial validation
+3. **Silver Layer**: Cleaned and standardized data
+4. **Gold Layer**: Business-ready datasets optimized for analytics
+5. **Quality Checks**: Automated validation and monitoring
+6. **Consumption**: Multiple interfaces for data access
 
-```bash
-# 1. Clone and navigate
-cd bws-breweries-pipeline
+## 🏛️ Medallion Architecture
 
-# 2. Create virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-# or
-source venv/bin/activate  # macOS/Linux
+### Bronze Layer (Raw)
+- Raw, unprocessed data from source systems
+- Minimal transformations applied
+- Preserves original data fidelity
+- Used for data recovery and reprocessing
 
-# 3. Install dependencies
-pip install -r requirements.txt
+### Silver Layer (Cleaned)
+- Standardized schemas and data types
+- Basic data quality validations
+- Deduplication and null handling
+- Ready for downstream processing
 
-# 4. Configure AWS (if not already done)
-aws configure
+### Gold Layer (Curated)
+- Business-rule compliant datasets
+- Optimized for query performance
+- Aggregated metrics and KPIs
+- Direct consumption by analytics tools
 
-# 5. Run the dashboard
-streamlit run streamlit_app/main.py
-```
+## 🔄 Airflow Orchestration
 
-Your dashboard will be available at: **http://localhost:8501**
+Pipeline orchestration is managed through Apache Airflow with a comprehensive DAG that handles:
 
-### Quick Start Using Makefile
+- API data ingestion via Lambda
+- Multi-layer data transformations with Glue
+- Automated data quality validations
+- Comprehensive monitoring and alerting
 
-```bash
-make venv
-make install
-make run
-```
+![Airflow DAG](docs/images/airflow_dag.png)
 
----
+For complete Airflow documentation, see [docs/airflow.md](docs/airflow.md).
 
-## 📁 Project Structure
+## 📈 Streamlit Dashboard
+
+An interactive web application providing three analytical perspectives:
+
+### Analytics Tab
+Explore brewery data with interactive filters, visualizations, and export capabilities.
+
+### Observability Tab
+Real-time monitoring of pipeline health, performance metrics, and system status.
+
+### Data Quality Tab
+Comprehensive data quality monitoring with validation rules and quality reports.
+
+**Demo Videos:**
+- [Analytics Demo](docs/videos/analytics.mp4)
+- [Observability Demo](docs/videos/observability.mp4)
+- [Data Quality Demo](docs/videos/data_quality.mp4)
+
+For detailed dashboard documentation, see [docs/dashboard.md](docs/dashboard.md).
+
+## 📁 Repository Structure
 
 ```
 bws-breweries-pipeline/
 │
 ├── streamlit_app/                    # 📊 Interactive Dashboard
-│   ├── main.py                      # Main Streamlit app
+│   ├── main.py                      # Main Streamlit application
 │   ├── config.py                    # Configuration settings
-│   ├── utils/
+│   ├── utils/                       # Utility modules
 │   │   ├── athena_connector.py     # AWS Athena connection
-│   │   └── data_processing.py      # Data utilities
-│   └── .streamlit/
-│       ├── config.toml             # Streamlit UI config
-│       └── secrets.toml.example    # Secrets template
+│   │   ├── data_processing.py      # Data processing utilities
+│   │   └── analytics_service.py    # Analytics functions
+│   └── Dockerfile                   # Container configuration
 │
-├── dags/                            # 🔀 Airflow DAGs
-│   └── brewery_pipeline.py         # Main pipeline definition
+├── dags/                            # 🔀 Airflow Orchestration
+│   └── brewery_pipeline.py         # Main pipeline DAG
 │
 ├── docker/                          # 🐳 Docker Configuration
-│   ├── docker-compose.yml          # Docker services
+│   ├── docker-compose.yml          # Multi-service setup
 │   └── docker.env                  # Environment variables
 │
 ├── docs/                            # 📚 Documentation
+│   ├── architecture.md             # Architecture details
+│   ├── airflow.md                  # Airflow orchestration
+│   ├── aws_setup.md                # AWS infrastructure
+│   ├── dashboard.md                # Dashboard guide
+│   ├── images/                     # Architecture diagrams
+│   └── videos/                     # Demo videos
 │
 ├── requirements.txt                 # Python dependencies
 ├── Makefile                         # Development commands
-├── .gitignore                       # Git ignore rules
-├── STREAMLIT_README.md              # Full dashboard docs
-├── SETUP_GUIDE_PT.md                # Setup guide (Portuguese)
 └── README.md                        # This file
 ```
 
----
+## ☁️ AWS Infrastructure
 
-## 🔧 Configuration
+The project leverages multiple AWS services for a complete data lake solution:
 
-### AWS Setup
+- **Lambda**: Serverless API ingestion
+- **S3**: Multi-tier data storage (Bronze/Silver/Gold)
+- **Glue**: ETL processing and catalog management
+- **Athena**: Serverless SQL queries
+- **DynamoDB**: Metadata and configuration storage
+- **CloudWatch**: Monitoring and alerting
+- **SES**: Email notifications
+
+For detailed AWS setup and configuration, see [docs/aws_setup.md](docs/aws_setup.md).
+
+## 🔐 Security & Read-only Access
+
+This project includes a read-only IAM user configuration for safe exploration and demonstration. The read-only user provides:
+
+- **S3 Read Access**: Browse Bronze, Silver, and Gold layer data
+- **Athena Query Access**: Execute SQL queries on processed datasets
+- **Glue Catalog Access**: Explore table schemas and metadata
+
+This setup ensures stakeholders can analyze data without risking production integrity, perfect for portfolio demonstrations and collaborative exploration.
+
+## 📊 Observability & Logging
+
+Comprehensive monitoring across all pipeline components:
+
+- **CloudWatch Metrics**: Performance monitoring and custom dashboards
+- **Structured Logging**: Application-level logs with context
+- **Alert Management**: Automated notifications for pipeline issues
+- **Health Checks**: Real-time system status and data quality metrics
+- **Audit Trails**: Complete audit logging for compliance
+
+## 👨‍💻 About the Author
+
+**Bruno William**
+
+*Data Engineer specializing in AWS Data Platforms*
+
+**Skills:**
+- AWS (Lambda, S3, Glue, Athena, CloudWatch)
+- Python & PySpark for data processing
+- Apache Airflow for workflow orchestration
+- Streamlit for interactive dashboards
+- Terraform for infrastructure as code
+
+**Connect:**
+- GitHub: [brunobws](https://github.com/brunobws)
+- LinkedIn: [Coming Soon]
+
+## 🗺️ Roadmap
+
+- [ ] **Infrastructure as Code**: Complete Terraform implementation
+- [ ] **CI/CD Pipeline**: Automated testing and deployment
+- [ ] **Data Quality Framework**: Advanced validation and anomaly detection
+- [ ] **Dashboard Enhancements**: Additional analytics and visualization features
+- [ ] **Observability Expansion**: Advanced monitoring and alerting capabilities
+
+## 🛠️ Technologies Used
+
+- **Cloud Platform**: Amazon Web Services (AWS)
+- **Data Processing**: Python, PySpark, AWS Glue
+- **Orchestration**: Apache Airflow
+- **Storage**: Amazon S3, DynamoDB
+- **Analytics**: Amazon Athena
+- **Dashboard**: Streamlit
+- **Monitoring**: Amazon CloudWatch
+- **Containerization**: Docker, Docker Compose
+- **Infrastructure**: Terraform (planned)
+
+## 🎯 Project Goal
+
+This project demonstrates enterprise-grade data engineering capabilities on AWS, showcasing:
+
+- Scalable data lake architecture with Medallion pattern
+- Automated ETL pipelines with comprehensive monitoring
+- Interactive analytics dashboards for business users
+- Production-ready security and access controls
+- Complete documentation and professional presentation
+
+Perfect for portfolio demonstration and real-world data platform implementation.
 
 **Ensure you have:**
 - AWS Account with Athena access
