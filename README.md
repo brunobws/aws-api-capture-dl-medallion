@@ -4,211 +4,145 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?style=for-the-badge&logo=apache-airflow&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=apache-spark&logoColor=white)
 
-A production-grade data lake that ingests brewery data from the [Open Brewery DB API](https://openbrewerydb.org/), processes it through a Medallion Architecture (Bronze → Silver → Gold), and serves interactive analytics. The entire pipeline is cloud-native on AWS with real-time monitoring and automated orchestration.
+A production-grade data lake that ingests brewery data from the [Open Brewery DB API](https://openbrewerydb.org/), transforms it through a three-tier Medallion Architecture, and serves analytics via a Streamlit dashboard. Built on AWS with modularized logging, automated data quality testing, and email notifications for pipeline failures.
 
-## 🎬 Live Dashboard
+## Live Dashboard
 
-**→ [Access the Analytics Dashboard](http://56.124.50.116:8501/)**
+**Access the dashboard:** http://56.124.50.116:8501/
 
-Explore real brewery data with interactive filters, visualizations, and exports. The dashboard features three main sections:
+Interactive analytics with three main sections:
 
-- **Analytics** – Browse brewery data with real-time filtering and custom queries
-- **Observability** – Monitor pipeline health, execution times, and data quality metrics
-- **Data Quality** – View validation results, anomalies, and completeness scores
+- **Analytics** – Browse brewery data, apply filters, run custom queries
+- **Observability** – Real-time pipeline health, execution times, and metrics
+- **Data Quality** – Data validation results, completeness scores, and anomalies
 
-## 🏗️ Architecture Overview
+Watch demo videos to see the dashboard in action:
 
-```
-Open Brewery API
-        ↓
-AWS Lambda (Daily Ingestion)
-        ↓
-S3 Bronze Layer (Raw JSON)
-        ↓
-AWS Glue ETL (PySpark)
-        ↓
-S3 Silver Layer (Parquet, Partitioned by Location)
-        ↓
-AWS Glue ETL (PySpark)
-        ↓
-S3 Gold Layer (Apache Iceberg, Pre-aggregated Analytics)
-        ↓
-AWS Athena (SQL Query Engine)
-        ↓
-Streamlit Dashboard (EC2) + Apache Airflow (EC2)
-```
+- [Analytics Dashboard Demo](docs/videos/Analytics_dash.mp4) (3 min)
+- [Observability Demo](docs/videos/observability.mp4) (2.2 min)
+- [Data Quality Demo](docs/videos/data_quality.mp4) (1.8 min)
 
-**[→ View detailed architecture with diagrams and security model](docs/architecture.md)**
+For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
-## ⚡ Quick Start
+## Architecture Overview
 
-**No local setup required.** The entire pipeline runs serverlessly on AWS. Visit the dashboard link above to see it in action.
+![Brewery Data Lake Architecture](docs/images/arquitecture.jpeg)
 
-To explore the data lake directly:
+[View full architecture with diagrams and detailed explanations](docs/architecture.md)
+
+For an interactive architecture diagram, see the [live Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
+
+## How It Works
+
+Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
+
+1. **Ingestion** – AWS Lambda calls the Open Brewery DB API, handles pagination, and stores raw JSON in S3 Bronze
+2. **Bronze Layer** – Raw data preserved as-is for disaster recovery and reprocessing
+3. **Silver Layer** – AWS Glue applies PySpark transformations: clean column names, handle nulls, remove duplicates, partition by location, store as Parquet
+4. **Gold Layer** – AWS Glue creates pre-aggregated analytics: count of breweries by type and location, stored in Apache Iceberg format
+5. **Execution Logging** – Each component (Lambda, Glue jobs) writes structured execution logs to a centralized Athena table `execution_logs`, partitioned by execution date, with step-level timing
+6. **Data Quality** – Automated validation tests for completeness, accuracy, and consistency across all layers; quality results stored in Athena
+7. **Email Alerts** – Configurable email notifications on failures and warnings, managed via DynamoDB `notification_params` table
+8. **Monitoring** – CloudWatch captures infrastructure metrics and logs; dashboard displays pipeline health in real-time
+
+## Data Storage
+
+| Layer | Format | Location | Purpose |
+|-------|--------|----------|---------|
+| Bronze | JSON | `s3://bws-dl-bronze-sae1-{env}/` | Raw API responses |
+| Silver | Parquet, partitioned | `s3://bws-dl-silver-sae1-{env}/` | Cleaned, standardized data |
+| Gold | Apache Iceberg, partitioned | `s3://bws-dl-gold-sae1-{env}/` | Pre-aggregated analytics |
+| Logs | Parquet, partitioned | `s3://bws-dl-logs-sae1-{env}/execution_logs/` | Structured execution records |
+
+## Quick Start
+
+No local setup required. Everything runs on AWS.
+
+To explore the data lake:
 
 ```
 AWS Console: https://580148408154.signin.aws.amazon.com/console
 User: datalake-reader
-Password: [Provided separately via secure channel]
+Password: [Provided in secure channel]
 ```
 
-With read-only access, you can:
-- Browse S3 Bronze/Silver/Gold layers
-- Write SQL queries in Amazon Athena
+Read-only access allows you to:
+- Browse S3 Bronze, Silver, Gold, and Logs layers
+- Query Athena tables: Gold layer analytics, execution logs, data quality results
 - Explore table schemas in AWS Glue Catalog
-- Monitor pipeline runs in CloudWatch
+- View pipeline execution records and audit trails
 
-## 🔄 How the Pipeline Works
-
-**Daily Schedule:** 7:00 AM UTC
-
-1. **Ingestion** – AWS Lambda invokes the Open Brewery DB API and dumps raw JSON to S3 Bronze
-2. **Bronze Layer** – Unmodified API responses, stored for disaster recovery
-3. **Silver Layer** – Data cleaning, deduplication, and partitioning by location (Parquet format)
-4. **Gold Layer** – Pre-aggregated analytics: count of breweries by type and location (Apache Iceberg format)
-5. **Monitoring** – CloudWatch tracks metrics, logs, and data quality; alerts on failures
-6. **Visualization** – Streamlit dashboard queries Athena and displays results in real-time
-
-The entire workflow is orchestrated by **Apache Airflow** running on EC2, with automatic retries, error notifications, and comprehensive logging.
-
-## 📊 Data Storage Details
-
-### Bronze Layer
-- **Format:** JSON (raw API responses)
-- **Location:** `s3://brewery-data-lake-bronze/`
-- **Purpose:** Disaster recovery and reprocessing capability
-
-### Silver Layer
-- **Format:** Parquet (columnar, compressed)
-- **Partitioning:** By `brewery_location` (e.g., `us/california/`)
-- **Location:** `s3://brewery-data-lake-silver/`
-- **Purpose:** Cleaned, standardized data ready for analytics
-
-### Gold Layer
-- **Format:** Apache Iceberg (ACID transactions, schema evolution, time travel)
-- **Partitioning:** By `brewery_location`
-- **Location:** `s3://brewery-data-lake-gold/`
-- **Table:** `tb_ft_breweries_agg`
-- **Purpose:** Business-ready aggregated metrics
-
-## 🔨 Built With
+## Technology Stack
 
 | Component | Technology |
-|-----------|-----------|
-| **Cloud Platform** | Amazon Web Services (AWS) |
-| **Data Ingestion** | AWS Lambda, Python |
-| **Data Processing** | AWS Glue, PySpark |
-| **Data Storage** | Amazon S3, Apache Parquet, Apache Iceberg |
-| **Query Engine** | Amazon Athena (Serverless SQL) |
-| **Orchestration** | Apache Airflow (EC2) |
-| **Dashboard** | Streamlit (EC2) |
-| **Monitoring** | Amazon CloudWatch |
-| **Messaging** | AWS SNS, SES |
-| **Infrastructure** | Docker, Docker Compose, EC2 |
+|-----------|------------|
+| **Cloud** | AWS (Lambda, Glue, Athena, S3, DynamoDB, SNS, SES, IAM, EC2) |
+| **Orchestration** | Apache Airflow |
+| **Processing** | Python, PySpark |
+| **Dashboard** | Streamlit |
+| **Storage** | Parquet, Apache Iceberg |
+| **Logging** | AWS CloudWatch, S3, Athena |
 
-## 📚 Documentation
+## Key Features
 
-For deeper dives into specific areas:
+**Modularized Logging** – All components (Lambda, Glue jobs) use a centralized Logs class that writes structured execution records with step-level timing to an Athena table. Each log includes job name, status, warnings, errors, and custom metadata.
 
-- **[Architecture](docs/architecture.md)** – Medallion pattern details, security model, data flow
-- **[Airflow Orchestration](docs/airflow.md)** – DAG structure, task dependencies, scheduling
-- **[AWS Infrastructure](docs/aws_setup.md)** – Services, IAM policies, and configuration
-- **[Dashboard Guide](docs/dashboard.md)** – How to use the Streamlit application
-- **[Monitoring & Alerting](docs/monitoring.md)** – CloudWatch metrics, health checks, incident response
+**Centralized Execution Logs** – A single Athena table `execution_logs` aggregates logs from all pipeline components, partitioned by execution date for efficient querying and auditing.
 
-## 📖 Code Structure
+**Data Quality Framework** – Automated validation tests check data completeness, accuracy, and consistency at each layer. Quality metrics are stored in Athena for historical analysis and trend detection.
 
-The codebase is organized by layer and function:
+**Email Alerting** – Configurable email notifications using AWS SES for pipeline failures and warnings. Alert recipients and thresholds are managed in DynamoDB.
 
-```
-bws-breweries-pipeline/
-├── aws/
-│   ├── lambda_scripts/
-│   │   ├── BronzeApiCaptureBreweries.py   # API ingestion
-│   │   └── CleanFolder.py                  # S3 cleanup
-│   ├── glue_scripts/
-│   │   ├── bronze_to_silver.py            # Cleaning & standardization
-│   │   └── silver_to_gold.py              # Aggregation
-│   └── modules/
-│       ├── logs.py          # CloudWatch logging
-│       ├── quality.py       # Data quality checks
-│       ├── pyspark_utils.py # PySpark helpers
-│       └── utils.py         # AWS utilities
-├── dags/
-│   └── brewery_pipeline.py   # Airflow DAG definition
-├── streamlit_app/
-│   ├── main.py              # Dashboard application
-│   ├── gold_analytics.py    # Analytics queries
-│   ├── logs_observability.py # Monitoring section
-│   ├── data_quality.py      # Quality checks display
-│   └── utils/               # Database connectors, services
-├── docker/
-│   ├── docker-compose.yml   # Multi-service orchestration
-│   └── docker.env           # Environment variables
-├── docs/                    # Complete documentation
-├── Makefile                 # Development commands
-└── README.md                # This file
-```
+**Automated Retry Logic** – Failed Lambda and Glue jobs automatically retry with exponential backoff, reducing transient failures.
 
-See the [AWS Setup Guide](docs/aws_setup.md) for details on each script and configuration.
+**Optimized Storage** – Silver and Gold layers use partitioning by location for query performance; Gold layer uses Apache Iceberg for ACID transactions and schema evolution.
 
-## 🔒 Security
+**DynamoDB Configuration** – Pipeline parameters, notification settings, and job configurations stored in DynamoDB tables for easy management without code changes.
 
-- **Read-only IAM user** – Safe exploration without production impact
-- **S3 encryption at rest** – All data encrypted with AWS KMS
-- **Audit logging** – CloudWatch logs all API calls and data access
-- **Secrets management** – AWS Secrets Manager for API keys and credentials
-- **No hardcoded secrets** – All credentials loaded from IAM roles or Secrets Manager
-- **VPC isolation** – EC2 instances run in private VPC with restricted access
+## Documentation
 
-## 🚀 What's Happening in the Cloud
+- [Architecture](docs/architecture.md) – Design patterns, data flow, security model
+- [Airflow Orchestration](docs/airflow.md) – DAG structure, dependencies, scheduling
+- [AWS Setup](docs/aws_setup.md) – Services, IAM policies, configuration
+- [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
+- [Monitoring & Alerting](docs/monitoring.md) – CloudWatch metrics, health checks, incident response
 
-When you use this project, here's what's running on AWS:
+## Code Organization
 
-**Serverless Components (Pay per use):**
-- AWS Lambda – API ingestion (daily)
-- AWS Glue – Data transformation (daily)
-- AWS Athena – SQL queries (on-demand)
-- Amazon S3 – Object storage (continuous)
+- [Lambda Scripts](aws/lambda_scripts/) – API ingestion and S3 cleanup
+- [Glue ETL Jobs](aws/glue_scripts/) – Bronze→Silver→Gold transformations
+- [Shared Modules](aws/modules/) – Centralized Logs class, AWS utilities, PySpark helpers, data quality functions
+- [Airflow DAG](dags/brewery_pipeline.py) – Pipeline orchestration
+- [Streamlit Dashboard](streamlit_app/) – Analytics interface
 
-**EC2 Components (Running 24/7):**
-- Apache Airflow – Orchestration and scheduling
-- Streamlit Dashboard – Web interface for analytics
+## Infrastructure & Security
 
-All other services (CloudWatch, SNS, SES, Secrets Manager) are managed by AWS.
+**Serverless Design** – Lambda, Glue, and Athena scale automatically with zero infrastructure management. Pay only for what you use.
 
-## 🤝 Getting Started
+**EC2 Services** – Streamlit dashboard and Apache Airflow run on dedicated EC2 instances for 24/7 availability.
 
-**New to this project?** Follow these steps:
+**Security Controls** – Read-only IAM user provided for safe exploration. All S3 data encrypted at rest using AWS KMS. No credentials hardcoded in repositories; all credentials loaded from EC2 IAM roles or AWS Secrets Manager.
 
-1. ✅ Open the [live dashboard](http://56.124.50.116:8501/)
-2. 📊 Explore brewery data with filters and visualizations
-3. 📈 Check the Observability tab to see real-time pipeline health
-4. 🔗 Access the data lake directly via AWS Console (read-only credentials above)
-5. 📖 Read the [Architecture guide](docs/architecture.md) for a deeper understanding
-6. 💻 Review the source code in `/aws`, `/dags`, and `/streamlit_app`
+**Audit Logging** – CloudWatch captures all API calls and data access for compliance and troubleshooting.
 
-## ⚠️ Important Notes
+See [AWS Setup Guide](docs/aws_setup.md) for detailed security configuration and IAM policies.
 
-- **Fully cloud-native** – Lambda, Glue, Athena, S3 all run on AWS infrastructure
-- **EC2 only for dashboarding** – Streamlit and Airflow UI run on EC2 for accessibility
-- **Automated scheduling** – Airflow triggers pipeline daily; no manual intervention needed
-- **Error handling** – Automatic retries for transient failures; alerts sent on critical errors
-- **Data quality checks** – Every layer includes validation; bad data is quarantined
-- **Cost optimized** – Serverless architecture means you pay only for what you use
+## Getting Started
 
-## 📞 Stay Connected
-
-**Questions or feedback?**
-
-- 📧 **Email:** brun0ws@outlook.com
-- 💼 **LinkedIn:** [bruno-wds](https://www.linkedin.com/in/brunowds/)
-- 📱 **WhatsApp:** +55 15 99759-5138
+1. Visit the live dashboard at http://56.124.50.116:8501/
+2. Watch the demo videos to understand dashboard features
+3. Access the data lake console to explore raw data layers
+4. Review the Architecture documentation to understand the design
+5. Check CloudWatch Logs for detailed execution traces and troubleshooting
 
 ---
 
-**Ready to explore?** [→ Open the Dashboard](http://56.124.50.116:8501/)
+## Questions or Feedback?
 
-For technical questions, check the [docs](docs/) folder or review the CloudWatch logs in your AWS Console.
+Thanks for reading! If you have any questions about the pipeline or would like to discuss the architecture, feel free to reach out.
+
+**Contact:**
+- Email: brun0ws@outlook.com
+- LinkedIn: https://www.linkedin.com/in/brunowds/
+- WhatsApp: +55 15 99759-5138
