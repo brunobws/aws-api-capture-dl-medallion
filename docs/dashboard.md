@@ -1,60 +1,67 @@
-# Streamlit Dashboard
+# Dashboard
 
-This document provides an overview of the interactive Streamlit dashboard for brewery data exploration and analytics.
+The Streamlit dashboard is the front-end of the data platform — a web application that connects directly to Athena and surfaces brewery analytics, pipeline execution history, and data quality results in one place.
 
-## Dashboard Overview
+It runs in a Docker container on the same EC2 instance as Airflow, accessible at port **8501**. Source code lives in [streamlit_app/](../streamlit_app/).
 
-The dashboard is a web-based application built with Streamlit, providing three main analytical perspectives on the brewery dataset.
+**Live dashboard:** http://56.124.50.116:8501/
 
-## 📊 Analytics Tab
+![Dashboard Screenshot](images/dashboard-screenshot.png)
 
-**Purpose**: Comprehensive data exploration and business intelligence.
+---
 
-**Features**:
-- **Interactive Filters**: Filter breweries by state, city, type, and other attributes
-- **Data Visualization**: Charts and graphs showing brewery distribution patterns
-- **Statistical Analysis**: Key metrics and trends in the brewery industry
-- **Export Capabilities**: Download filtered data in multiple formats (CSV, JSON, Parquet)
+## Analytics
 
-**Demo Video**: [View Analytics Demo](docs/videos/analytics.mp4)
+The Analytics tab queries the Gold layer Iceberg table (`gold.tb_ft_breweries_agg`) and displays pre-aggregated brewery data with cascading filters and interactive charts.
 
-## 🔍 Observability Tab
+**Filters:** Country → State → Brewery Type, applied in cascade so each selection narrows the next.
 
-**Purpose**: Real-time monitoring of pipeline health and system performance.
+**What you can see:**
+- KPI cards showing total breweries, countries, states, and types in the current filter selection
+- Bar chart of brewery count by type
+- Bar chart of top states by brewery count
+- Detailed sortable data table
+- Export to CSV or JSON
 
-**Features**:
-- **Pipeline Status**: Live view of Airflow DAG execution status
-- **Performance Metrics**: Query performance, data processing times, error rates
-- **System Health**: AWS service utilization and resource monitoring
-- **Alert Dashboard**: Active alerts and incident tracking
+Results are cached for 5 minutes to avoid unnecessary Athena queries on repeated interactions.
 
-**Demo Video**: [View Observability Demo](docs/videos/observability.mp4)
+[Watch Analytics Demo](videos/01-analytics-dashboard-demo.mp4)
 
-## 🛡️ Data Quality Tab
+---
 
-**Purpose**: Validation and monitoring of data quality across all pipeline stages.
+## Observability
 
-**Features**:
-- **Quality Metrics**: Completeness, accuracy, and consistency scores
-- **Data Profiling**: Statistical summaries and data distribution analysis
-- **Validation Rules**: Custom business rules and threshold monitoring
-- **Quality Reports**: Historical quality trends and issue tracking
+The Observability tab reads from the `execution_logs` Athena table — the same table the `Logs` module writes to across Lambda and both Glue jobs. It shows the last 90 days of execution history.
 
-**Demo Video**: [View Data Quality Demo](docs/videos/data_quality.mp4)
+**What you can see:**
+- Pipeline health KPIs: total executions, success rate, warning count, error count
+- Execution trend chart by week
+- Status distribution (success / warning / error)
+- Job performance metrics per component
+- Recent execution details table with step-level timing from the `info` field
 
-## Technical Implementation
+[Watch Observability Demo](videos/02-observability-logs-demo.mp4)
 
-- **Backend**: Direct connection to AWS Athena for real-time queries
-- **Frontend**: Streamlit web application with responsive design
-- **Caching**: Intelligent caching for improved performance
-- **Security**: AWS IAM authentication and read-only access controls
+---
 
-## User Experience
+## Data Quality
 
-The dashboard provides an intuitive interface for both technical and business users to:
-- Explore brewery data without complex SQL queries
-- Monitor pipeline operations in real-time
-- Ensure data quality meets business requirements
-- Export data for further analysis in external tools
+The Data Quality tab reads from the `quality_logs` Athena table — written by the `Quality` module after each run of `bronze_to_silver`. It covers the last 90 days of quality check history.
 
-All tabs are designed for self-service analytics while maintaining enterprise-grade security and performance standards.
+**What you can see:**
+- KPI cards: total tests run, pass rate, failure count
+- Pie chart of test status distribution
+- Most frequently failing columns
+- Detailed test results table filterable by table, job, or status
+- Export to CSV or JSON
+
+[Watch Data Quality Demo](videos/03-data-quality-demo.mp4)
+
+---
+
+## Technical Notes
+
+- **Backend:** All three tabs query Athena directly via [PyAthena](https://github.com/laughingman7743/PyAthena), using the same `AthenaService` wrapper
+- **Caching:** Query results are cached for 300 seconds using a custom `cached_query` decorator to reduce Athena costs
+- **Charts:** Built with [Plotly Express](https://plotly.com/python/plotly-express/) for interactive visualizations
+- **Containerization:** Runs in Docker on EC2 — see [streamlit_app/Dockerfile](../streamlit_app/Dockerfile)

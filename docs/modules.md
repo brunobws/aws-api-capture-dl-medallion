@@ -73,6 +73,10 @@ Wraps [AWS SES](https://docs.aws.amazon.com/ses/latest/dg/Welcome.html) for send
 
 Provides three standardized templates: `send_email_on_failure` (red), `send_email_on_warning` (orange), and `send_email_on_success` (green) — each renders an HTML email with job name, table, domain, execution time, and description.
 
+![SES error notification email](images/error_ses_email.png)
+
+![SES success notification email](images/sucess_ses_email.png)
+
 ### S3
 
 Wraps [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) for file operations.
@@ -171,6 +175,10 @@ It is triggered by the `bronze_to_silver` job when `has_bdq: true` is set in `in
 Results land in the `quality_logs` Athena table:
 
 ![Data quality logs table on Athena](images/athena_quality_logs_select_query.png)
+
+When a check fails, an email is dispatched via SES with the full HTML report attached:
+
+![SES quality failure notification email](images/failure_quality_test_ses.png)
 
 ---
 

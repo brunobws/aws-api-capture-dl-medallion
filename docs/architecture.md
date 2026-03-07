@@ -154,5 +154,13 @@ This custom observability approach is the primary way to monitor the pipeline. C
 
 ![Data quality logs table on Athena](images/athena_quality_logs_select_query.png)
 
+When a job fails or a quality check doesn't pass, an email is dispatched via [AWS SES](https://docs.aws.amazon.com/ses/latest/dg/Welcome.html) to the addresses configured in the `notification_params` DynamoDB table.
+
+![SES error notification email](images/error_ses_email.png)
+
+![SES quality failure notification email](images/failure_quality_test_ses.png)
+
+![SES success notification email](images/sucess_ses_email.png)
+
 > [!NOTE]
 > For full logging and quality module documentation, see [modules.md](modules.md).
