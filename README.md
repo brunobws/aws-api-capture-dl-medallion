@@ -7,7 +7,7 @@
 
 A production-grade data lake that ingests brewery data from the [Open Brewery DB API](https://openbrewerydb.org/), transforms it through a three-tier Medallion Architecture, and serves analytics via a Streamlit dashboard. Built on AWS with modularized logging, automated data quality testing, and email notifications for pipeline failures.
 
-## Live Dashboard
+## Live Dashboard 📊
 
 **Access the dashboard:** http://56.124.50.116:8501/
 
@@ -27,7 +27,7 @@ Watch demo videos to see the dashboard in action:
 
 For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
-## Architecture Overview
+## Architecture Overview 
 
 ![Brewery Data Lake Architecture](docs/images/architecture-diagram.jpeg)
 
@@ -35,7 +35,7 @@ For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
 For an interactive architecture diagram, see the [live Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
 
-## How It Works
+## How It Works 
 
 Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 
@@ -48,7 +48,7 @@ Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 7. **Email Alerts** – Configurable email notifications on failures and warnings using [AWS SES](https://docs.aws.amazon.com/ses/), managed via DynamoDB `notification_params` table
 8. **Monitoring** – All pipeline components write structured logs to a centralized Athena `execution_logs` table, partitioned by execution date; [AWS CloudWatch](https://docs.aws.amazon.com/cloudwatch/) captures infrastructure metrics for real-time visibility
 
-## Cloud Setup
+## Cloud Setup ☁️
 
 All components run on AWS infrastructure with zero local setup required.
 
@@ -77,14 +77,14 @@ You cannot:
 
 | Component | Technology |
 |-----------|------------|
-| **Cloud** | [AWS Lambda](https://docs.aws.amazon.com/lambda/), [Glue](https://docs.aws.amazon.com/glue/), [Athena](https://docs.aws.amazon.com/athena/), [S3](https://docs.aws.amazon.com/s3/), [DynamoDB](https://docs.aws.amazon.com/dynamodb/), [SNS](https://docs.aws.amazon.com/sns/), [SES](https://docs.aws.amazon.com/ses/), IAM, EC2 |
+| **Cloud** | [AWS Lambda](https://docs.aws.amazon.com/lambda/), [Glue](https://docs.aws.amazon.com/glue/), [Athena](https://docs.aws.amazon.com/athena/), [S3](https://docs.aws.amazon.com/s3/), [DynamoDB](https://docs.aws.amazon.com/dynamodb/), [SES](https://docs.aws.amazon.com/ses/), [IAM](https://docs.aws.amazon.com/iam/), [EC2](https://docs.aws.amazon.com/ec2/), [CloudWatch](https://docs.aws.amazon.com/cloudwatch/) |
 | **Orchestration** | Apache Airflow |
 | **Processing** | Python, PySpark |
 | **Dashboard** | Streamlit |
 | **Storage** | [Parquet](https://parquet.apache.org/), [Apache Iceberg](https://iceberg.apache.org/) |
 | **Logging** | AWS CloudWatch, S3, Athena |
 
-## Key Features
+## Key Features ✨
 
 **Modularized Logging** – All components (Lambda, Glue jobs) use a [centralized Logs class](aws/modules/logs.py) that writes structured execution records with step-level timing to an Athena table. Each log includes job name, status, warnings, errors, and custom metadata.
 
@@ -108,7 +108,7 @@ You cannot:
 - [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
 - [Monitoring & Alerting](docs/monitoring.md) – CloudWatch metrics, health checks, incident response
 
-## Code Organization
+## Code Organization 
 
 - [Lambda Scripts](aws/lambda_scripts/) – API ingestion and S3 cleanup
 - [Glue ETL Jobs](aws/glue_scripts/) – Bronze→Silver→Gold transformations
@@ -116,7 +116,7 @@ You cannot:
 - [Airflow DAG](dags/brewery_pipeline.py) – Pipeline orchestration
 - [Streamlit Dashboard](streamlit_app/) – Analytics interface
 
-## Infrastructure & Security
+## Infrastructure & Security 
 
 **Serverless Design** – [Lambda](https://docs.aws.amazon.com/lambda/), [Glue](https://docs.aws.amazon.com/glue/), and [Athena](https://docs.aws.amazon.com/athena/) scale automatically with zero infrastructure management. Pay only for what you use.
 
@@ -130,7 +130,18 @@ See [AWS Setup Guide](docs/aws_setup.md) for detailed security configuration and
 
 ---
 
-## Questions or Feedback?
+## Roadmap 
+
+Future enhancements planned for this project:
+
+- **CI/CD Pipeline** – Automated testing, linting, and deployment with GitHub Actions (CI/CD)
+- **Infrastructure as Code** – Deploy the entire stack using Terraform for reproducibility and version control
+- **Architecture Video** – Walkthrough video explaining the Medallion Architecture, data flow, and design decisions
+- **Service Access Links** – User-friendly direct links to Airflow UI and Streamlit dashboard management
+
+---
+
+## Questions or Feedback? 💬
 
 Thanks for reading! If you have any questions about the pipeline or would like to discuss the architecture, feel free to reach out.
 
