@@ -21,6 +21,7 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 [![Documentation](https://img.shields.io/badge/Documentation-FD7E14?style=for-the-badge)](#documentation)
 [![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization)
 [![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security)
+[![Testing](https://img.shields.io/badge/Testing-343A40?style=for-the-badge)](#testing)
 [![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap)
 [![Contact](https://img.shields.io/badge/Questions_&_Feedback-343A40?style=for-the-badge)](#questions-or-feedback)
 
@@ -171,14 +172,58 @@ See the [Architecture — Security section](docs/architecture.md#security) for d
 
 ---
 
+<a id="testing"></a>
+
+## Testing
+
+Unit tests cover the shared `support.py` module — pure Python functions with no AWS dependencies, runnable fully offline.
+
+**Install pytest:**
+```bash
+pip install pytest
+```
+
+**Run all tests:**
+```bash
+pytest tests/ -v
+# or
+make test
+```
+
+**Expected output:**
+```
+tests/test_support.py::TestSummarizeException::test_returns_empty_string_for_none PASSED
+tests/test_support.py::TestSummarizeException::test_returns_empty_string_for_empty_file_sentinel PASSED
+tests/test_support.py::TestGetDateAndTime::test_format_is_correct PASSED
+...
+27 passed in 0.3s
+```
+
+See [tests/test_support.py](tests/test_support.py) for the full test suite.
+
+---
+
 <a id="roadmap"></a>
 
 ## Roadmap
 
 Future enhancements planned for this project:
 
-- **CI/CD Pipeline** – Automated testing, linting, and deployment with GitHub Actions
-- **Infrastructure as Code** – Deploy the entire stack using Terraform for reproducibility and version control
+- **Custom domain with HTTPS** – Replace the raw IP:port access for the Streamlit dashboard and Airflow UI with a custom domain, SSL certificate via ACM, and an Nginx reverse proxy — making both services accessible through clean, secure URLs
+
+- **Unit tests** – ✅ Implemented for `support.py` using pytest (27 tests, runs fully offline). Coverage planned for `logs.py` and `utils.py` with boto3 mocks. See [tests/](tests/).
+
+- **Containerized deployment** – ✅ Airflow and Streamlit run in isolated Docker containers on a single EC2 instance, managed via Docker Compose. See [docker/](docker/).
+
+- **Monitoring and alerting** – ✅ Full observability stack: structured execution logs written to Athena (`execution_logs`), automated data quality checks via Great Expectations (`quality_logs`), and color-coded HTML email notifications via AWS SES on failure, warning, and success with a dashboard to see the observability. See [Modules](docs/modules.md).
+
+- **Configuration-driven pipeline** – ✅ Both Glue jobs are generic engines driven entirely by DynamoDB parameters — no code changes needed to onboard a new data source. Schema, partitioning, quality checks, and alert recipients are all externalized. See [DynamoDB Parameters](docs/dynamo_params.md).
+
+- **CI/CD Pipeline** – GitHub Actions workflow that runs tests and linting on every push, then automatically packages and deploys Lambda functions and Glue scripts to the corresponding AWS environment
+
+- **Infrastructure as Code** – Provision the entire AWS stack (S3 buckets, Lambda, Glue jobs, DynamoDB tables, IAM roles, EC2 security groups) using Terraform, enabling reproducible deployments from scratch with a single command
+
+- **Multi-environment support** – Extend the existing `env` parameter pattern to a structured dev/prd pipeline with separate DynamoDB configurations, S3 prefixes, and Airflow connections per environment
 
 ---
 

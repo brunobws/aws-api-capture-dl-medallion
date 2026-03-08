@@ -1,7 +1,7 @@
 # Breweries Project Makefile
 # EC2 Production Commands
 
-.PHONY: help docker-build docker-up docker-down docker-logs aws-check clean
+.PHONY: help docker-build docker-up docker-down docker-logs aws-check test clean
 
 help:
 	@echo "================================================"
@@ -12,6 +12,7 @@ help:
 	@echo "  make docker-down        - Stop services"
 	@echo "  make docker-logs        - View service logs"
 	@echo "  make aws-check          - Verify AWS credentials/IAM"
+	@echo "  make test               - Run unit tests"
 	@echo "  make clean              - Clean cache and temp files"
 	@echo "================================================"
 
@@ -29,6 +30,9 @@ docker-logs:
 
 aws-check:
 	aws sts get-caller-identity
+
+test:
+	pytest tests/ -v
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
