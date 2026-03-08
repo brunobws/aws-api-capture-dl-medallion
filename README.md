@@ -12,18 +12,18 @@ A production-grade data lake that ingests brewery data from the [Open Brewery DB
 
 ## Table of Contents
 
-[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-0066FF?style=for-the-badge)](#live-dashboard)
-[![Architecture](https://img.shields.io/badge/Architecture-FF9900?style=for-the-badge)](#architecture-overview)
-[![How It Works](https://img.shields.io/badge/How_It_Works-28A745?style=for-the-badge)](#how-it-works)
-[![Cloud Setup](https://img.shields.io/badge/Cloud_Setup-6F42C1?style=for-the-badge)](#cloud-setup)
-[![Technology Stack](https://img.shields.io/badge/Technology_Stack-17A2B8?style=for-the-badge)](#technology-stack)
-[![Key Features](https://img.shields.io/badge/Key_Features-E83E8C?style=for-the-badge)](#key-features)
-[![Documentation](https://img.shields.io/badge/Documentation-FD7E14?style=for-the-badge)](#documentation)
-[![Code Organization](https://img.shields.io/badge/Code_Organization-20C997?style=for-the-badge)](#code-organization)
-[![Security](https://img.shields.io/badge/Infrastructure_&_Security-DC3545?style=for-the-badge)](#infrastructure--security)
-[![Testing](https://img.shields.io/badge/Testing-343A40?style=for-the-badge)](#testing)
-[![Roadmap](https://img.shields.io/badge/Roadmap-6C757D?style=for-the-badge)](#roadmap)
-[![Contact](https://img.shields.io/badge/Questions_&_Feedback-343A40?style=for-the-badge)](#questions-or-feedback)
+- [Live Dashboard](#live-dashboard)
+- [Architecture Overview](#architecture-overview)
+- [How It Works](#how-it-works)
+- [Cloud Setup](#cloud-setup)
+- [Technology Stack](#technology-stack)
+- [Key Features](#key-features)
+- [Documentation](#documentation)
+- [Code Organization](#code-organization)
+- [Infrastructure & Security](#infrastructure--security)
+- [Testing](#testing)
+- [Roadmap](#roadmap)
+- [Questions or Feedback](#questions-or-feedback)
 
 <a id="live-dashboard"></a>
 
@@ -49,13 +49,17 @@ For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
 <a id="architecture-overview"></a>
 
-## Architecture Overview 
+## Architecture Overview
 
 ![Brewery Data Lake Architecture](docs/images/architecture-diagram.jpeg)
 
-[View full architecture with diagrams and detailed explanations](docs/architecture.md)
+The pipeline runs on a fully serverless AWS stack — except for the EC2 instance that hosts Airflow and the Streamlit dashboard. Data flows through three layers:
 
-For an interactive architecture diagram, see the [live Miro board](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836).
+- **Bronze** – Raw JSON from the Open Brewery DB API, preserved as-is in S3 for full reprocessability
+- **Silver** – PySpark-transformed [Parquet](https://parquet.apache.org/) files, partitioned by country and state for efficient querying
+- **Gold** – Pre-aggregated [Apache Iceberg](https://iceberg.apache.org/) table with brewery counts by type and location, queryable via Athena
+
+[Full architecture documentation →](docs/architecture.md) · [Interactive Miro board →](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836)
 
 <a id="how-it-works"></a>
 
@@ -115,7 +119,7 @@ You cannot:
 | **Orchestration** | Apache Airflow (Docker on EC2) |
 | **Processing** | Python, PySpark |
 | **Dashboard** | Streamlit (Docker on EC2) |
-| **Storage** | [Parquet](https://parquet.apache.org/), [Apache Iceberg](https://iceberg.apache.org/) |
+| **Data Format** | [Parquet](https://parquet.apache.org/) (Silver), [Apache Iceberg](https://iceberg.apache.org/) (Gold) |
 | **Data Quality** | [Great Expectations](https://docs.greatexpectations.io/) |
 | **Logging** | AWS CloudWatch, S3, Athena |
 
@@ -137,6 +141,8 @@ You cannot:
 
 **DynamoDB Configuration** – Pipeline parameters, notification settings, and job configurations stored in DynamoDB tables for easy management without code changes.
 
+**Unit Tests** – Core shared functions covered by 27 pytest tests, runnable fully offline with no AWS dependencies. See [tests/](tests/).
+
 <a id="documentation"></a>
 
 ## Documentation
@@ -155,6 +161,7 @@ You cannot:
 - [Shared Modules](aws/modules/) – Centralized Logs class, AWS utilities, PySpark helpers, data quality functions
 - [Airflow DAG](dags/brewery_pipeline.py) – Pipeline orchestration
 - [Streamlit Dashboard](streamlit_app/) – Analytics interface
+- [Unit Tests](tests/) – pytest suite for shared modules, runs fully offline
 
 <a id="infrastructure--security"></a>
 
