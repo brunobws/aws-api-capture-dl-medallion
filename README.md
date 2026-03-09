@@ -45,7 +45,8 @@ Watch demo videos to see the dashboard in action:
 - [Observability Logs Demo](docs/videos/02-observability-logs-demo.mp4) (2.2 min)
 - [Data Quality Demo](docs/videos/03-data-quality-demo.mp4) (1.8 min)
 
-For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
+> [!NOTE]
+> For detailed dashboard documentation, see [Streamlit Guide](docs/dashboard.md).
 
 <a id="architecture-overview"></a>
 
@@ -59,7 +60,8 @@ The pipeline runs on a fully serverless AWS stack — except for the EC2 instanc
 - **Silver** – PySpark-transformed [Parquet](https://parquet.apache.org/) files, partitioned by country and state for efficient querying
 - **Gold** – Pre-aggregated [Apache Iceberg](https://iceberg.apache.org/) table with brewery counts by type and location, queryable via Athena
 
-[Full architecture documentation →](docs/architecture.md) · [Interactive Miro board →](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836)
+> [!NOTE]
+> [Full architecture documentation →](docs/architecture.md) · [Interactive Miro board →](https://miro.com/app/live-embed/uXjVG24Xf7s=/?focusWidget=3458764662592067466&embedMode=view_only_without_ui&embedId=571479114836)
 
 <a id="how-it-works"></a>
 
@@ -152,6 +154,7 @@ You cannot:
 - [Dashboard Guide](docs/dashboard.md) – Using Streamlit analytics
 - [Modules](docs/modules.md) – Shared Python modules: Logs, Quality, AwsManager
 - [DynamoDB Parameters](docs/dynamo_params.md) – Pipeline configuration tables
+- [Unit Tests](docs/unit_tests.md) – Full test reference with per-class test tables
 
 <a id="code-organization"></a>
 
@@ -208,7 +211,8 @@ tests/test_support.py::TestGetDateAndTime::test_format_is_correct PASSED
 44 passed in 0.3s
 ```
 
-For the full list of tests and their descriptions, see [Unit Tests](docs/unit_tests.md).
+> [!NOTE]
+> For the full list of tests and their descriptions, see [Unit Tests](docs/unit_tests.md).
 
 ---
 
@@ -246,3 +250,4 @@ Thanks for reading! If you have any questions about the pipeline or would like t
 - Email: brun0ws@outlook.com
 - LinkedIn: https://www.linkedin.com/in/brunowds/
 - WhatsApp: https://wa.me/5515997595138
+- Phone: +55 15 99759-5138
