@@ -36,11 +36,19 @@ The Observability tab reads from the `execution_logs` Athena table — the same 
 **What you can see:**
 - Pipeline health KPIs: total executions, success rate, warning count, error count
 - Execution trend chart by week
-- Status distribution (success / warning / error)
+- Status distribution (success / warning / error) — see status definitions below
 - Job performance metrics per component
 - Recent execution details table with step-level timing from the `info` field
 
 [Watch Observability Demo](videos/02-observability-logs-demo.mp4)
+
+**Execution status definitions:**
+
+| Status | Meaning |
+|---|---|
+| `success` | Pipeline completed and all data quality tests passed |
+| `warning` | Pipeline completed and data was written, but at least one data quality test did not pass — or the source returned an empty file (`empty_file` sentinel) |
+| `error` | Pipeline failed — data was not written |
 
 ---
 

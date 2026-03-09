@@ -89,8 +89,22 @@ When `has_bdq: true` is set in `ingestion_params`, the job reads this table and 
 |---|---|---|
 | `trgt_tbl` | string | Primary key. Matches the `trgt_tbl` in `ingestion_params`. |
 | `quality_params.not_null` | object | Defines columns that must not contain null values. `column` accepts a comma-separated list. |
-| `quality_params.unique_vals` | object | Defines columns that must contain only unique (non-duplicate) values. |
+| `quality_params.unique_vals` | object | Defines columns that must contain only unique (non-duplicate) values. `column` accepts a comma-separated list. |
 | `quality_params.df_count_between` | object | Validates that the total row count of the DataFrame falls within `min` and `max` bounds. Catches empty or unexpectedly large loads. |
 | `quality_params.value_match_regex` | object | Validates column values against regex patterns. `column` and `regex` are comma-separated lists in the same order — each column is paired with its corresponding pattern. |
+| `quality_params.values_between` | object | Validates that numeric column values fall within a specified range. `column`, `min`, and `max` are comma-separated and aligned by index. Also reports the mean of unexpected values. |
+| `quality_params.value_length_between` | object | Validates that string column values have lengths within a defined range. `column`, `min`, and `max` are comma-separated and aligned by index. |
+| `quality_params.date_mask_equal` | object | Validates that date column values match their expected strftime format. `column` and `date_mask` are comma-separated and aligned by index. |
+| `quality_params.values_to_be_in_set` | object | Validates that column values belong to an allowed set. Accepts `column` (comma-separated), `type` (`int`, `float`, `str`), and `set_values` (list of lists). |
+| `quality_params.values_not_be_in_set` | object | Validates that column values do not contain any forbidden values. Same structure as `values_to_be_in_set`. |
+| `quality_params.compare_count_df_with_db` | object | Compares the row count of the Athena DataFrame against a relational database query. Requires `ssm_name`, `technology`, and `db_query`. |
+| `quality_params.compare_df_with_df_db` | object | Performs a full row-level comparison between the Athena DataFrame and a database result set. Requires `ssm_name`, `technology`, `db_query`, and `schema`. |
+| `quality_params.general_metrics_athena_db` | object | Compares aggregate metrics (row counts, sums, min/max dates) between multiple Athena tables and their database counterparts. Requires `athena_tables`, `db_tables`, `ssm_name`, and `technology`. |
+| `quality_params.stop_job` | boolean | **Controls job halt behavior on quality failure.** See note below. |
+
+> [!IMPORTANT]
+> **`stop_job`** determines what happens when a quality check fails:
+> - `false` (default) — the job continues, data is written to Silver, and the execution is logged with status `warning`
+> - `true` — the job halts immediately, an error is raised, and **no data is written**
 
 For full details on how the Quality module works, how results are stored in Athena, and what happens on failure, see [modules.md](modules.md).
