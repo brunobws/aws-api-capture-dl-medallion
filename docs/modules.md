@@ -170,7 +170,16 @@ It is triggered by the `bronze_to_silver` job when `has_bdq: true` is set in `in
 | Date format | `date_mask_equal` | Validates date columns match their expected strftime format |
 | String length | `value_length_between` | Validates string values have lengths within a given range |
 | Numeric range | `values_between` | Validates numeric values fall within `min` and `max`; reports mean of unexpected values |
-| Cross-system row count | `compare_count_df_with_db` | Compares the DataFrame row count against a result from a relational DB via JDBC (uses SSM for credentials) |
+| Allowed set | `values_to_be_in_set` | Validates column values belong to a defined allowed set |
+| Forbidden set | `values_not_be_in_set` | Validates column values do not contain any forbidden values |
+| Cross-system row count | `compare_count_df_with_db` | Compares the DataFrame row count against a relational DB query result via JDBC (uses SSM for credentials) |
+| Cross-system row diff | `compare_df_with_df_db` | Full row-level comparison between the Athena DataFrame and a DB result set; strips invisible Unicode characters and aligns schemas before diffing |
+| Cross-system metrics | `general_metrics_athena_db` | Compares aggregate metrics (row counts, sums, min/max dates) between multiple Athena tables and their DB counterparts |
+
+> [!IMPORTANT]
+> **`stop_job`** controls what happens when a check fails:
+> - `false` (default) — data is written to Silver and the execution is logged as `warning`
+> - `true` — the job halts immediately, an error is raised, and **no data is written**
 
 Results land in the `quality_logs` Athena table:
 
