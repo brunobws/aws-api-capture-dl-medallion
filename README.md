@@ -87,7 +87,8 @@ Daily at 7:00 AM UTC, the Airflow DAG triggers the following automated workflow:
 
 All components run on AWS infrastructure with zero local setup required.
 
-A dedicated read-only user was created for you to safely explore the data lake. Access it with the credentials below – no need to install any software or configure anything locally.
+> [!NOTE]
+> A dedicated read-only user was created for you to safely explore the data lake. Access it with the credentials below — no need to install any software or configure anything locally.
 
 ```
 AWS Console: https://580148408154.signin.aws.amazon.com/console
@@ -141,7 +142,7 @@ You cannot:
 
 **DynamoDB Configuration** – Pipeline parameters, notification settings, and job configurations stored in DynamoDB tables for easy management without code changes.
 
-**Unit Tests** – Core shared functions covered by 27 pytest tests, runnable fully offline with no AWS dependencies. See [tests/](tests/).
+**Unit Tests** – 44 pytest tests covering the shared modules and Lambda ingestion logic, runnable fully offline with no AWS dependencies. See [tests/](tests/).
 
 <a id="documentation"></a>
 
@@ -161,7 +162,7 @@ You cannot:
 - [Shared Modules](aws/modules/) – Centralized Logs class, AWS utilities, PySpark helpers, data quality functions
 - [Airflow DAG](dags/brewery_pipeline.py) – Pipeline orchestration
 - [Streamlit Dashboard](streamlit_app/) – Analytics interface
-- [Unit Tests](tests/) – pytest suite for shared modules, runs fully offline
+- [Unit Tests](tests/) – pytest suite for shared modules and Lambda, runs fully offline. See [docs/unit_tests.md](docs/unit_tests.md) for the full test list
 
 <a id="infrastructure--security"></a>
 
@@ -183,7 +184,7 @@ See the [Architecture — Security section](docs/architecture.md#security) for d
 
 ## Testing
 
-Unit tests cover the shared `support.py` module — pure Python functions with no AWS dependencies, runnable fully offline.
+Unit tests cover the shared `support.py` module and the `BronzeApiCaptureBreweries` Lambda — pure logic and mocked AWS calls, runnable fully offline.
 
 **Install pytest:**
 ```bash
@@ -193,9 +194,10 @@ pip install pytest
 **Run all tests:**
 ```bash
 pytest tests/ -v
-# or
-make test
 ```
+
+> [!TIP]
+> `make test` is only available on Linux/macOS. On Windows, use `pytest tests/ -v` directly.
 
 **Expected output:**
 ```
@@ -203,10 +205,10 @@ tests/test_support.py::TestSummarizeException::test_returns_empty_string_for_non
 tests/test_support.py::TestSummarizeException::test_returns_empty_string_for_empty_file_sentinel PASSED
 tests/test_support.py::TestGetDateAndTime::test_format_is_correct PASSED
 ...
-27 passed in 0.3s
+44 passed in 0.3s
 ```
 
-See [tests/test_support.py](tests/test_support.py) for the full test suite.
+For the full list of tests and their descriptions, see [Unit Tests](docs/unit_tests.md).
 
 ---
 
@@ -218,7 +220,7 @@ Future enhancements planned for this project:
 
 - **Custom domain with HTTPS** – Replace the raw IP:port access for the Streamlit dashboard and Airflow UI with a custom domain, SSL certificate via ACM, and an Nginx reverse proxy — making both services accessible through clean, secure URLs
 
-- **Unit tests** – ✅ Implemented for `support.py` using pytest (27 tests, runs fully offline). Coverage planned for `logs.py` and `utils.py` with boto3 mocks. See [tests/](tests/).
+- **Unit tests** – ✅ Implemented for `support.py` and `BronzeApiCaptureBreweries` Lambda using pytest (44 tests, runs fully offline). Coverage planned for `logs.py` and `utils.py` with boto3 mocks. See [tests/](tests/).
 
 - **Containerized deployment** – ✅ Airflow and Streamlit run in isolated Docker containers on a single EC2 instance, managed via Docker Compose. See [docker/](docker/).
 
